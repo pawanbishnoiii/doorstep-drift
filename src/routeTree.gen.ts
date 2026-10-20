@@ -10,11 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PointPartnerRouteImport } from './routes/point-partner'
+import { Route as TrackRouteImport } from './routes/track'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedShipRouteImport } from './routes/_authenticated/ship'
+import { Route as AuthenticatedVerifyPhoneRouteImport } from './routes/_authenticated/verify-phone'
+import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PointPartnerRoute = PointPartnerRouteImport.update({
@@ -22,31 +38,106 @@ const PointPartnerRoute = PointPartnerRouteImport.update({
   path: '/point-partner',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedShipRoute = AuthenticatedShipRouteImport.update({
+  id: '/ship',
+  path: '/ship',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVerifyPhoneRoute =
+  AuthenticatedVerifyPhoneRouteImport.update({
+    id: '/verify-phone',
+    path: '/verify-phone',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const ApiPublicHealthCheckRoute = ApiPublicHealthCheckRouteImport.update({
+  id: '/api/public/health-check',
+  path: '/api/public/health-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/track': typeof TrackRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/ship': typeof AuthenticatedShipRoute
+  '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/track': typeof TrackRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/ship': typeof AuthenticatedShipRoute
+  '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/track': typeof TrackRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/ship': typeof AuthenticatedShipRoute
+  '/_authenticated/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/point-partner'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/point-partner'
+    | '/track'
+    | '/dashboard'
+    | '/ship'
+    | '/verify-phone'
+    | '/api/public/health-check'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/point-partner'
-  id: '__root__' | '/' | '/point-partner'
+  to:
+    | '/'
+    | '/auth'
+    | '/point-partner'
+    | '/track'
+    | '/dashboard'
+    | '/ship'
+    | '/verify-phone'
+    | '/api/public/health-check'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/point-partner'
+    | '/track'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/ship'
+    | '/_authenticated/verify-phone'
+    | '/api/public/health-check'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   PointPartnerRoute: typeof PointPartnerRoute
+  TrackRoute: typeof TrackRoute
+  ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +149,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/point-partner': {
       id: '/point-partner'
       path: '/point-partner'
@@ -65,12 +170,66 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PointPartnerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ship': {
+      id: '/_authenticated/ship'
+      path: '/ship'
+      fullPath: '/ship'
+      preLoaderRoute: typeof AuthenticatedShipRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/verify-phone': {
+      id: '/_authenticated/verify-phone'
+      path: '/verify-phone'
+      fullPath: '/verify-phone'
+      preLoaderRoute: typeof AuthenticatedVerifyPhoneRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/health-check': {
+      id: '/api/public/health-check'
+      path: '/api/public/health-check'
+      fullPath: '/api/public/health-check'
+      preLoaderRoute: typeof ApiPublicHealthCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedShipRoute: typeof AuthenticatedShipRoute
+  AuthenticatedVerifyPhoneRoute: typeof AuthenticatedVerifyPhoneRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedShipRoute: AuthenticatedShipRoute,
+  AuthenticatedVerifyPhoneRoute: AuthenticatedVerifyPhoneRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   PointPartnerRoute: PointPartnerRoute,
+  TrackRoute: TrackRoute,
+  ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
