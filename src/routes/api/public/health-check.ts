@@ -10,7 +10,7 @@ export const Route = createFileRoute("/api/public/health-check")({
         if (authFailure) return authFailure;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const started = Date.now();
-        const checks: Record<string, unknown> = {};
+        const checks: Record<string, { ok: boolean; rows?: number | null; error?: string }> = {};
         let status = "healthy";
         for (const table of ["profiles", "shipments", "tracking_events", "point_applications"] as const) {
           const { count, error } = await supabaseAdmin.from(table).select("id", { count: "exact", head: true });

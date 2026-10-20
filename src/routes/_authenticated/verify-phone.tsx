@@ -26,7 +26,7 @@ function VerifyPhone() {
   const [busy, setBusy] = useState(false);
 
   const request = async () => {
-    if (!/^[6-9]\d{9}$/.test(phone)) return toast.error("Enter a valid 10-digit mobile number");
+    if (!/^[6-9]\d{9}$/.test(phone)) { toast.error("Enter a valid 10-digit mobile number"); return; }
     setBusy(true);
     try {
       const r = await send({ data: { phone } });
