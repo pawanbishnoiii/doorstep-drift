@@ -30,6 +30,7 @@ function Track() {
   const { data, isFetching } = useQuery({
     queryKey: ["track", id],
     enabled: !!id,
+    refetchInterval: (q) => (q.state.data && (q.state.data as NonNullable<Result>).status !== "delivered" ? 15000 : false),
     queryFn: async () => {
       const { data, error } = await supabase.rpc("track_shipment", { _tracking: id! });
       if (error) throw error;
@@ -47,8 +48,8 @@ function Track() {
             <button className="rounded-2xl bg-primary px-6 font-bold text-primary-foreground">Track</button>
           </form>
           <div className="mt-8">
-            {isFetching && <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />}
-            {!isFetching && id && !data && <div className="rounded-[28px] bg-card p-8 text-center"><PackageSearch className="mx-auto h-10 w-10 text-muted-foreground" /><p className="mt-3 font-bold">No shipment found for {id}</p></div>}
+            {isFetching && !data && <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />}
+            {!isFetching && id && data === null && <div className="rounded-[28px] bg-card p-8 text-center"><PackageSearch className="mx-auto h-10 w-10 text-muted-foreground" /><p className="mt-3 font-bold">No shipment found for {id}</p></div>}
             {data && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-[32px] bg-card p-6 shadow-soft">
                 <div className="flex items-start justify-between">

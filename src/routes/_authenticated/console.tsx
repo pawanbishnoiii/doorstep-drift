@@ -8,13 +8,13 @@ import { AppShell } from "@/components/site/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { grantRoleByEmail } from "@/lib/shipments.functions";
 import { searchPincodes } from "@/lib/pincodes.functions";
+import { ROLE_LABEL } from "@/hooks/use-roles";
 
 export const Route = createFileRoute("/_authenticated/console")({
   head: () => ({ meta: [{ title: "Staff console — DropBox" }, { name: "description", content: "DropBox staff console: roles, pincode allocations and audit log." }] }),
   component: Console,
 });
 
-import { ROLE_LABEL } from "@/hooks/use-roles";
 
 function Console() {
   const qc = useQueryClient();
