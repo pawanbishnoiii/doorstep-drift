@@ -1,15 +1,17 @@
-import { lazy, Suspense } from "react";
-import { ClientOnly } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import parcel from "@/assets/parcel-lottie.json";
 
-const Lottie = lazy(() => import("lottie-react").then((m) => ({ default: m.default })));
-
+/** Bouncing parcel Lottie animation (lottie-web, loaded client-side only). */
 export function ParcelLottie({ className }: { className?: string }) {
-  return (
-    <ClientOnly fallback={<div className={className} />}>
-      <Suspense fallback={<div className={className} />}>
-        <Lottie animationData={parcel} loop className={className} />
-      </Suspense>
-    </ClientOnly>
-  );
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let anim: { destroy: () => void } | undefined;
+    let cancelled = false;
+    import("lottie-web").then(({ default: lottie }) => {
+      if (cancelled || !ref.current) return;
+      anim = lottie.loadAnimation({ container: ref.current, renderer: "svg", loop: true, autoplay: true, animationData: parcel });
+    });
+    return () => { cancelled = true; anim?.destroy(); };
+  }, []);
+  return <div ref={ref} className={className} aria-hidden />;
 }
