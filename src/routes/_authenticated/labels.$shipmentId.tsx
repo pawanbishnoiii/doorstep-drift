@@ -25,7 +25,6 @@ function Labels() {
       const { data: s, error } = await supabase.from("shipments").select("*").eq("id", shipmentId).single();
       if (error) throw error;
       const { data: pieces } = await supabase.from("shipment_pieces").select("*").eq("shipment_id", shipmentId).order("seq_no");
-      const { data: prints } = await supabase.from("label_prints").select("piece_id").eq("piece_id", shipmentId);
       return { s: s as LabelShipment & { id: string; status: string }, pieces: (pieces ?? []) as (LabelPiece & { id: string })[] };
     },
   });
