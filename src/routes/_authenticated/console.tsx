@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Download, Loader2, MapPin, ShieldCheck, Upload, Users } from "lucide-react";
 import { AppShell } from "@/components/site/AppShell";
@@ -14,11 +14,11 @@ export const Route = createFileRoute("/_authenticated/console")({
   component: Console,
 });
 
-const ROLE_LABEL: Record<string, string> = { admin: "Admin / Head Office", state_director: "State Director", state_manager: "State Manager", area_manager: "Area Manager", point: "Point / Mini Hub", network: "Network Ops" };
+import { ROLE_LABEL } from "@/hooks/use-roles";
 
 function Console() {
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"allocations" | "staff" | "import" | "audit">("allocations");
+  const [tab, setTab] = useState<"allocations" | "team" | "staff" | "import" | "audit">("allocations");
   const { data: roles } = useQuery({
     queryKey: ["my-roles"],
     queryFn: async () => (await supabase.from("user_roles").select("role")).data?.map((r) => r.role) ?? [],
@@ -41,7 +41,7 @@ function Console() {
   });
 
   if (roles && roles.length === 0)
-    return <AppShell><div className="pt-20 text-center"><ShieldCheck className="mx-auto h-10 w-10 text-muted-foreground" /><p className="mt-3 font-bold">No staff role on this account.</p><p className="text-sm text-muted-foreground">Ask an Admin to grant you a role.</p></div></AppShell>;
+    return <AppShell wide><div className="pt-20 text-center"><ShieldCheck className="mx-auto h-10 w-10 text-muted-foreground" /><p className="mt-3 font-bold">No staff role on this account.</p><p className="text-sm text-muted-foreground">Ask an Admin to grant you a role.</p></div></AppShell>;
 
   const isAdmin = roles?.includes("admin");
   const myAllocPins = (allocations ?? []).filter((a) => a.status === "active");
@@ -56,14 +56,14 @@ function Console() {
   };
 
   return (
-    <AppShell>
+    <AppShell wide>
       <h1 className="font-display text-3xl font-extrabold">Staff console</h1>
       <div className="mt-1 flex flex-wrap gap-1.5">
         {roles?.map((r) => <span key={r} className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{ROLE_LABEL[r] ?? r}</span>)}
         {(scopes ?? []).map((s) => <span key={s.id} className="rounded-full bg-muted px-3 py-1 text-xs font-bold">{s.state ?? "Point"}</span>)}
       </div>
       <div className="mt-5 flex gap-1.5 overflow-x-auto">
-        {([["allocations", MapPin, "Pincodes"], ["staff", Users, "Staff"], ["import", Upload, "Import"], ["audit", ShieldCheck, "Audit"]] as const).map(([t, Icon, label]) => (
+        {([["allocations", MapPin, "Pincodes"], ["team", Users, "Team"], ["staff", Users, "Grant role"], ["import", Upload, "Import"], ["audit", ShieldCheck, "Audit"]] as const).map(([t, Icon, label]) => (
           <button key={t} onClick={() => setTab(t)} className={`flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm font-bold ${tab === t ? "bg-ink text-ink-foreground" : "border bg-card"}`}><Icon className="h-4 w-4" />{label}</button>
         ))}
       </div>
@@ -96,6 +96,7 @@ function Console() {
         </div>
       )}
 
+      {tab === "team" && <TeamPanel allocations={allocations ?? []} onDone={() => refetch()} />}
       {tab === "staff" && <StaffForm roles={roles ?? []} />}
       {tab === "import" && <ImportPanel isAdmin={!!isAdmin} />}
       {tab === "audit" && (
@@ -110,6 +111,58 @@ function Console() {
         </div>
       )}
     </AppShell>
+  );
+}
+
+/** Accepts a verified mobile number or a user ID and returns the user ID. */
+async function resolveHolder(v: string): Promise<string | null> {
+  if (/^[0-9a-f-]{36}$/i.test(v)) return v;
+  if (/^\+?\d{10,13}$/.test(v)) {
+    const { data, error } = await supabase.rpc("find_user_by_phone", { _phone: v });
+    if (error) { toast.error(error.message); return null; }
+    const u = data?.[0];
+    if (!u) { toast.error("No verified account with that mobile number"); return null; }
+    toast.message(`Found ${u.full_name ?? "user"} (${(u.roles ?? []).join(", ") || "no role"})`);
+    return u.user_id;
+  }
+  toast.error("Enter a 10-digit mobile number or a user ID");
+  return null;
+}
+
+function TeamPanel({ allocations, onDone }: { allocations: { id: string; pincode: string; holder_user_id: string; holder_role: string; status: string }[]; onDone: () => void }) {
+  const { data = [] } = useQuery({ queryKey: ["staff-dir"], queryFn: async () => (await supabase.rpc("staff_directory")).data ?? [] });
+  const [target, setTarget] = useState<Record<string, string>>({});
+  return (
+    <div className="mt-5 space-y-2">
+      {data.map((u) => {
+        const held = allocations.filter((a) => a.holder_user_id === u.user_id && a.status === "active");
+        return (
+          <div key={u.user_id} className="rounded-2xl border bg-card p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div><p className="font-bold">{u.full_name ?? "—"} <span className="text-sm font-semibold text-muted-foreground">{u.phone}</span></p>
+                <p className="break-all font-mono text-xs text-muted-foreground">ID: {u.user_id}</p></div>
+              <div className="flex flex-wrap gap-1">{(u.roles ?? []).map((r) => <span key={r} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">{ROLE_LABEL[r] ?? r}</span>)}{(u.states ?? []).map((st) => <span key={st} className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold">{st}</span>)}</div>
+            </div>
+            {held.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {held.map((a) => (
+                  <div key={a.id} className="flex items-center gap-1 rounded-xl border px-2 py-1 text-xs">
+                    <b className="font-mono">{a.pincode}</b>
+                    <input value={target[a.id] ?? ""} onChange={(e) => setTarget({ ...target, [a.id]: e.target.value.trim() })} placeholder="transfer to mobile/ID" className="w-36 bg-transparent outline-none" />
+                    <button className="font-bold text-primary" onClick={async () => {
+                      const to = await resolveHolder(target[a.id] ?? ""); if (!to) return;
+                      const { error } = await supabase.rpc("transfer_pincode", { _allocation_id: a.id, _new_holder: to });
+                      if (error) toast.error(error.message); else { toast.success(`${a.pincode} transferred`); onDone(); }
+                    }}>Transfer</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {data.length === 0 && <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">No staff in your scope yet.</p>}
+    </div>
   );
 }
 
@@ -144,20 +197,22 @@ function AllocateForm({ roles, onDone }: { roles: string[]; onDone: () => void }
             </div>
           )}
         </div>
-        <input value={holder} onChange={(e) => setHolder(e.target.value)} placeholder="Holder user ID (UUID)" className="h-12 rounded-2xl border bg-background px-4 text-sm font-semibold outline-none" />
+        <input value={holder} onChange={(e) => setHolder(e.target.value.trim())} placeholder="Holder mobile or user ID" className="h-12 rounded-2xl border bg-background px-4 text-sm font-semibold outline-none" />
         <select value={level} onChange={(e) => setLevel(e.target.value)} className="h-12 rounded-2xl border bg-background px-4 text-sm font-bold outline-none">
           {levels.map((l) => <option key={l} value={l}>{ROLE_LABEL[l]}</option>)}
         </select>
       </div>
       <button disabled={busy || !/^\d{6}$/.test(pin) || !holder} onClick={async () => {
         setBusy(true);
-        const { error } = await supabase.rpc("allocate_pincode", { _pincode: pin, _holder: holder, _holder_role: level as "state_manager" | "area_manager" | "point" });
+        const holderId = await resolveHolder(holder);
+        if (!holderId) { setBusy(false); return; }
+        const { error } = await supabase.rpc("allocate_pincode", { _pincode: pin, _holder: holderId, _holder_role: level as "state_manager" | "area_manager" | "point" });
         setBusy(false);
         if (error) toast.error(error.message); else { toast.success(`Pincode ${pin} allocated`); setPin(""); setHolder(""); onDone(); }
       }} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-bold text-primary-foreground disabled:opacity-40">
         {busy && <Loader2 className="h-4 w-4 animate-spin" />} Allocate
       </button>
-      <p className="mt-2 text-xs text-muted-foreground">The holder's user ID is shown on their Staff tab. Conflicts and out-of-scope pins are rejected automatically.</p>
+      <p className="mt-2 text-xs text-muted-foreground">Enter the holder's verified mobile number or their user ID (shown in the Team tab). Conflicts and out-of-scope pins are rejected automatically.</p>
     </div>
   );
 }
@@ -169,7 +224,7 @@ function StaffForm({ roles }: { roles: string[] }) {
   const [state, setState] = useState("");
   const [busy, setBusy] = useState(false);
   const [myId, setMyId] = useState("");
-  supabase.auth.getUser().then(({ data }) => setMyId(data.user?.id ?? ""));
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setMyId(data.user?.id ?? "")); }, []);
   const grantable = roles.includes("admin") ? ["admin", "state_director", "state_manager", "area_manager", "network", "point"]
     : roles.includes("state_director") ? ["state_manager"] : roles.includes("state_manager") ? ["area_manager"] : roles.includes("area_manager") ? ["point"] : [];
   return (
@@ -177,7 +232,7 @@ function StaffForm({ roles }: { roles: string[] }) {
       <p className="font-bold">Grant a staff role</p>
       <p className="mt-1 break-all text-xs text-muted-foreground">Your user ID (share it with your manager for pincode allocation): <span className="font-mono font-bold text-ink">{myId}</span></p>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="staff@email.com" className="h-12 rounded-2xl border bg-background px-4 text-sm font-semibold outline-none" />
+        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="staff email or mobile" className="h-12 rounded-2xl border bg-background px-4 text-sm font-semibold outline-none" />
         <select value={role} onChange={(e) => setRole(e.target.value)} className="h-12 rounded-2xl border bg-background px-4 text-sm font-bold outline-none">
           {grantable.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
         </select>
@@ -186,7 +241,12 @@ function StaffForm({ roles }: { roles: string[] }) {
       <button disabled={busy || !email || grantable.length === 0} onClick={async () => {
         setBusy(true);
         try {
-          await grant({ data: { email, role: role as "area_manager", ...(state ? { state } : {}) } });
+          if (email.includes("@")) await grant({ data: { email, role: role as "area_manager", ...(state ? { state } : {}) } });
+          else {
+            const id = await resolveHolder(email); if (!id) { setBusy(false); return; }
+            const { error } = await supabase.rpc("grant_staff_role", { _user_id: id, _role: role as "area_manager", ...(state ? { _state: state } : {}) });
+            if (error) throw new Error(error.message);
+          }
           toast.success(`Role granted to ${email}`); setEmail("");
         } catch (e) { toast.error((e as Error).message); }
         setBusy(false);
