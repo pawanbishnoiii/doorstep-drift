@@ -1,10 +1,12 @@
 # Roadmap
-- [x] Study reference repo UI and port its landing style
-- [x] Database: profiles, roles, shipments, tracking, Point applications, OTPs, health checks
-- [x] Auth: Google first, email fallback, mobile OTP (on-screen in dev)
-- [x] Landing page + Point Partner (hub joining) page with 8+ generated branded images
-- [x] Booking flow, my shipments, public tracking
-- [x] DB health check every 4 hours
-- [ ] Admin / Point / Network dashboards (next)
-- [ ] Real SMS provider (needs MSG91/Fast2SMS account)
-- [ ] Online payments (Razorpay)
+- [x] Landing + Point Partner pages, branded images, auth (Google + email), OTP (on-screen dev), booking, tracking, health check cron
+- [x] P0: role hierarchy (Admin→State Director→State Manager→Area Manager→Point, Network separate) with server-side enforcement
+- [x] P0: pincode master (24,241 rows) + allocation engine with conflict checks, history, release, audit
+- [x] P0: master AWB + per-parcel piece IDs from server sequence
+- [x] P0: Code 128 + QR labels, 4×6 thermal & A4 PDF, print logging, reprint reasons, blocked for unpaid/cancelled
+- [x] P0: staff scan page (camera + manual), piece-level tracking events, public tracking by AWB or piece ID
+- [x] Pincode autosuggest in booking, Excel export, staff console, terms page
+- [ ] Bootstrap first admin (needs the owner's email; then grant admin role)
+- [ ] Razorpay online payments (needs API keys) — booking flow already supports awaiting_payment state
+- [ ] Real SMS OTP (needs MSG91/Fast2SMS)
+- [ ] P1: bag/seal/manifests, commissions, notifications
