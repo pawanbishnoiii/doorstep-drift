@@ -301,7 +301,13 @@ export type Database = {
       track_shipment: { Args: { _tracking: string }; Returns: Json }
     }
     Enums: {
-      app_role: "admin" | "point" | "network"
+      app_role:
+        | "admin"
+        | "point"
+        | "network"
+        | "state_director"
+        | "state_manager"
+        | "area_manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -429,7 +435,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "point", "network"],
+      app_role: [
+        "admin",
+        "point",
+        "network",
+        "state_director",
+        "state_manager",
+        "area_manager",
+      ],
     },
   },
 } as const
