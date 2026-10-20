@@ -18,7 +18,7 @@ function Coupons() {
   const { data = [] } = useQuery({ queryKey: ["coupons"], queryFn: async () => (await supabase.from("coupons").select("*").order("created_at", { ascending: false })).data ?? [] });
   const [f, setF] = useState({ code: "", description: "", discount_type: "percent", discount_value: "10", max_discount: "", min_order: "0", max_uses: "", per_user_limit: "1", expires_at: "" });
   const save = async () => {
-    if (!/^[A-Z0-9]{3,30}$/.test(f.code)) return toast.error("Code: 3–30 letters/numbers");
+    if (!/^[A-Z0-9]{3,30}$/.test(f.code)) { toast.error("Code: 3–30 letters/numbers"); return; }
     const { error } = await supabase.from("coupons").insert({
       code: f.code, description: f.description || null, discount_type: f.discount_type, discount_value: Number(f.discount_value),
       max_discount: f.max_discount ? Number(f.max_discount) : null, min_order: Number(f.min_order) || 0,

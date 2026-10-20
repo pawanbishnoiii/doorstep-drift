@@ -1,5 +1,5 @@
 /** Free OpenStreetMap (Nominatim) geocoding, called from the browser only. No API key needed. */
-export type GeoHit = { lat: number; lng: number; label: string; pincode?: string; city?: string; state?: string };
+export type GeoHit = { lat: number; lng: number; label: string; pincode?: string | undefined; city?: string | undefined; state?: string | undefined };
 
 const BASE = "https://nominatim.openstreetmap.org";
 
