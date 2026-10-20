@@ -44,6 +44,102 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_redemptions: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          discount: number
+          id: string
+          shipment_id: string
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          discount: number
+          id?: string
+          shipment_id: string
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          discount?: number
+          id?: string
+          shipment_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_redemptions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          max_discount: number | null
+          max_uses: number | null
+          min_order: number
+          per_user_limit: number
+          starts_at: string
+          used_count: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type?: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          max_discount?: number | null
+          max_uses?: number | null
+          min_order?: number
+          per_user_limit?: number
+          starts_at?: string
+          used_count?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          max_discount?: number | null
+          max_uses?: number | null
+          min_order?: number
+          per_user_limit?: number
+          starts_at?: string
+          used_count?: number
+        }
+        Relationships: []
+      }
       health_checks: {
         Row: {
           checked_at: string
@@ -96,6 +192,98 @@ export type Database = {
             columns: ["piece_id"]
             isOneToOne: false
             referencedRelation: "shipment_pieces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          channel: string
+          created_at: string
+          error: string | null
+          id: string
+          kind: string
+          meta: Json
+          recipient: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          body: string
+          channel?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          kind: string
+          meta?: Json
+          recipient?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string
+          channel?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          kind?: string
+          meta?: Json
+          recipient?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string | null
+          mode: string
+          provider: string
+          provider_ref: string | null
+          shipment_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          mode?: string
+          provider?: string
+          provider_ref?: string | null
+          shipment_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          mode?: string
+          provider?: string
+          provider_ref?: string | null
+          shipment_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -269,7 +457,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string
           avatar_url: string | null
+          business_name: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -278,7 +468,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_type?: string
           avatar_url?: string | null
+          business_name?: string | null
           created_at?: string
           full_name?: string | null
           id: string
@@ -287,7 +479,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_type?: string
           avatar_url?: string | null
+          business_name?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -341,12 +535,17 @@ export type Database = {
       shipments: {
         Row: {
           contents: string | null
+          coupon_code: string | null
           created_at: string
           declared_value: number | null
+          dims: Json | null
+          discount: number
           id: string
           origin_point_id: string | null
           payment_method: string
           payment_status: string
+          pickup_lat: number | null
+          pickup_lng: number | null
           pieces_count: number
           price: number
           receiver_address: string
@@ -369,12 +568,17 @@ export type Database = {
         }
         Insert: {
           contents?: string | null
+          coupon_code?: string | null
           created_at?: string
           declared_value?: number | null
+          dims?: Json | null
+          discount?: number
           id?: string
           origin_point_id?: string | null
           payment_method?: string
           payment_status?: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           pieces_count?: number
           price: number
           receiver_address: string
@@ -397,12 +601,17 @@ export type Database = {
         }
         Update: {
           contents?: string | null
+          coupon_code?: string | null
           created_at?: string
           declared_value?: number | null
+          dims?: Json | null
+          discount?: number
           id?: string
           origin_point_id?: string | null
           payment_method?: string
           payment_status?: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           pieces_count?: number
           price?: number
           receiver_address?: string
@@ -542,6 +751,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_exists: { Args: never; Returns: boolean }
       allocate_pincode: {
         Args: {
           _holder: string
@@ -554,6 +764,17 @@ export type Database = {
       can_access_pincode: {
         Args: { _pin: string; _user: string }
         Returns: boolean
+      }
+      claim_first_admin: { Args: never; Returns: boolean }
+      dashboard_summary: { Args: never; Returns: Json }
+      find_user_by_phone: {
+        Args: { _phone: string }
+        Returns: {
+          full_name: string
+          phone: string
+          roles: string[]
+          user_id: string
+        }[]
       }
       grant_staff_role: {
         Args: {
@@ -572,6 +793,7 @@ export type Database = {
         Returns: boolean
       }
       import_pincodes: { Args: { _rows: Json }; Returns: number }
+      is_staff: { Args: { _u: string }; Returns: boolean }
       next_awb: { Args: never; Returns: string }
       next_piece_code: { Args: never; Returns: string }
       release_pincode: { Args: { _allocation_id: string }; Returns: undefined }
@@ -584,7 +806,21 @@ export type Database = {
         }
         Returns: Json
       }
+      staff_directory: {
+        Args: never
+        Returns: {
+          full_name: string
+          phone: string
+          roles: string[]
+          states: string[]
+          user_id: string
+        }[]
+      }
       track_shipment: { Args: { _tracking: string }; Returns: Json }
+      transfer_pincode: {
+        Args: { _allocation_id: string; _new_holder: string; _note?: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
