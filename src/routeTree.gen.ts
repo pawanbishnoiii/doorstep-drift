@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PointPartnerRouteImport } from './routes/point-partner'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as AuthenticatedConsoleRouteImport } from './routes/_authenticated/console'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
 import { Route as AuthenticatedShipRouteImport } from './routes/_authenticated/ship'
@@ -40,10 +42,20 @@ const PointPartnerRoute = PointPartnerRouteImport.update({
   path: '/point-partner',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedConsoleRoute = AuthenticatedConsoleRouteImport.update({
+  id: '/console',
+  path: '/console',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
@@ -82,7 +94,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
+  '/console': typeof AuthenticatedConsoleRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/scan': typeof AuthenticatedScanRoute
   '/ship': typeof AuthenticatedShipRoute
@@ -94,7 +108,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
+  '/console': typeof AuthenticatedConsoleRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/scan': typeof AuthenticatedScanRoute
   '/ship': typeof AuthenticatedShipRoute
@@ -108,7 +124,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
+  '/_authenticated/console': typeof AuthenticatedConsoleRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/_authenticated/ship': typeof AuthenticatedShipRoute
@@ -122,7 +140,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/point-partner'
+    | '/terms'
     | '/track'
+    | '/console'
     | '/dashboard'
     | '/scan'
     | '/ship'
@@ -134,7 +154,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/point-partner'
+    | '/terms'
     | '/track'
+    | '/console'
     | '/dashboard'
     | '/scan'
     | '/ship'
@@ -147,7 +169,9 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/point-partner'
+    | '/terms'
     | '/track'
+    | '/_authenticated/console'
     | '/_authenticated/dashboard'
     | '/_authenticated/scan'
     | '/_authenticated/ship'
@@ -161,6 +185,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PointPartnerRoute: typeof PointPartnerRoute
+  TermsRoute: typeof TermsRoute
   TrackRoute: typeof TrackRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
 }
@@ -195,12 +220,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PointPartnerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/track': {
       id: '/track'
       path: '/track'
       fullPath: '/track'
       preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/console': {
+      id: '/_authenticated/console'
+      path: '/console'
+      fullPath: '/console'
+      preLoaderRoute: typeof AuthenticatedConsoleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
@@ -248,6 +287,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedConsoleRoute: typeof AuthenticatedConsoleRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedShipRoute: typeof AuthenticatedShipRoute
@@ -256,6 +296,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedConsoleRoute: AuthenticatedConsoleRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedShipRoute: AuthenticatedShipRoute,
@@ -271,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PointPartnerRoute: PointPartnerRoute,
+  TermsRoute: TermsRoute,
   TrackRoute: TrackRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
 }
