@@ -15,8 +15,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PointPartnerRouteImport } from './routes/point-partner'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
 import { Route as AuthenticatedShipRouteImport } from './routes/_authenticated/ship'
 import { Route as AuthenticatedVerifyPhoneRouteImport } from './routes/_authenticated/verify-phone'
+import { Route as AuthenticatedLabelsShipmentIdRouteImport } from './routes/_authenticated/labels.$shipmentId'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
 const IndexRoute = IndexRouteImport.update({
@@ -48,6 +50,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedScanRoute = AuthenticatedScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedShipRoute = AuthenticatedShipRouteImport.update({
   id: '/ship',
   path: '/ship',
@@ -57,6 +64,12 @@ const AuthenticatedVerifyPhoneRoute =
   AuthenticatedVerifyPhoneRouteImport.update({
     id: '/verify-phone',
     path: '/verify-phone',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLabelsShipmentIdRoute =
+  AuthenticatedLabelsShipmentIdRouteImport.update({
+    id: '/labels/$shipmentId',
+    path: '/labels/$shipmentId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const ApiPublicHealthCheckRoute = ApiPublicHealthCheckRouteImport.update({
@@ -71,8 +84,10 @@ export interface FileRoutesByFullPath {
   '/point-partner': typeof PointPartnerRoute
   '/track': typeof TrackRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/scan': typeof AuthenticatedScanRoute
   '/ship': typeof AuthenticatedShipRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRoutesByTo {
@@ -81,8 +96,10 @@ export interface FileRoutesByTo {
   '/point-partner': typeof PointPartnerRoute
   '/track': typeof TrackRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/scan': typeof AuthenticatedScanRoute
   '/ship': typeof AuthenticatedShipRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRoutesById {
@@ -93,8 +110,10 @@ export interface FileRoutesById {
   '/point-partner': typeof PointPartnerRoute
   '/track': typeof TrackRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/_authenticated/ship': typeof AuthenticatedShipRoute
   '/_authenticated/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/_authenticated/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRouteTypes {
@@ -105,8 +124,10 @@ export interface FileRouteTypes {
     | '/point-partner'
     | '/track'
     | '/dashboard'
+    | '/scan'
     | '/ship'
     | '/verify-phone'
+    | '/labels/$shipmentId'
     | '/api/public/health-check'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -115,8 +136,10 @@ export interface FileRouteTypes {
     | '/point-partner'
     | '/track'
     | '/dashboard'
+    | '/scan'
     | '/ship'
     | '/verify-phone'
+    | '/labels/$shipmentId'
     | '/api/public/health-check'
   id:
     | '__root__'
@@ -126,8 +149,10 @@ export interface FileRouteTypes {
     | '/point-partner'
     | '/track'
     | '/_authenticated/dashboard'
+    | '/_authenticated/scan'
     | '/_authenticated/ship'
     | '/_authenticated/verify-phone'
+    | '/_authenticated/labels/$shipmentId'
     | '/api/public/health-check'
   fileRoutesById: FileRoutesById
 }
@@ -184,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/scan': {
+      id: '/_authenticated/scan'
+      path: '/scan'
+      fullPath: '/scan'
+      preLoaderRoute: typeof AuthenticatedScanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ship': {
       id: '/_authenticated/ship'
       path: '/ship'
@@ -198,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVerifyPhoneRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/labels/$shipmentId': {
+      id: '/_authenticated/labels/$shipmentId'
+      path: '/labels/$shipmentId'
+      fullPath: '/labels/$shipmentId'
+      preLoaderRoute: typeof AuthenticatedLabelsShipmentIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/health-check': {
       id: '/api/public/health-check'
       path: '/api/public/health-check'
@@ -210,14 +249,18 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedShipRoute: typeof AuthenticatedShipRoute
   AuthenticatedVerifyPhoneRoute: typeof AuthenticatedVerifyPhoneRoute
+  AuthenticatedLabelsShipmentIdRoute: typeof AuthenticatedLabelsShipmentIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedShipRoute: AuthenticatedShipRoute,
   AuthenticatedVerifyPhoneRoute: AuthenticatedVerifyPhoneRoute,
+  AuthenticatedLabelsShipmentIdRoute: AuthenticatedLabelsShipmentIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
