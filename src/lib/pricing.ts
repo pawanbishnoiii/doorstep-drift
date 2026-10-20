@@ -32,3 +32,13 @@ export function quote(params: { fromPin: string; toPin: string; weightKg: number
 }
 
 const round = (n: number) => Math.round(n * 100) / 100;
+
+export type CouponRule = { discount_type: string; discount_value: number; max_discount: number | null; min_order: number };
+
+/** Discount for a coupon on an order total; 0 when the order is below the minimum. */
+export function couponDiscount(total: number, c: CouponRule) {
+  if (total < c.min_order) return 0;
+  let d = c.discount_type === "percent" ? (total * c.discount_value) / 100 : c.discount_value;
+  if (c.max_discount != null) d = Math.min(d, c.max_discount);
+  return round(Math.min(d, total));
+}
