@@ -542,6 +542,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      allocate_pincode: {
+        Args: {
+          _holder: string
+          _holder_role: Database["public"]["Enums"]["app_role"]
+          _note?: string
+          _pincode: string
+        }
+        Returns: string
+      }
+      can_access_pincode: {
+        Args: { _pin: string; _user: string }
+        Returns: boolean
+      }
+      grant_staff_role: {
+        Args: {
+          _point_id?: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _state?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -549,8 +571,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_pincodes: { Args: { _rows: Json }; Returns: number }
       next_awb: { Args: never; Returns: string }
       next_piece_code: { Args: never; Returns: string }
+      release_pincode: { Args: { _allocation_id: string }; Returns: undefined }
+      scan_piece: {
+        Args: {
+          _code: string
+          _location?: string
+          _note?: string
+          _status: string
+        }
+        Returns: Json
+      }
       track_shipment: { Args: { _tracking: string }; Returns: Json }
     }
     Enums: {
