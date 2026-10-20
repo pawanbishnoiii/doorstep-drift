@@ -10,6 +10,15 @@ export const Route = createFileRoute("/_authenticated/scan")({
   component: Scan,
 });
 
+type Info = { tracking_number: string; status: string; from_city: string; to_city: string; pieces: { code: string; seq: number; total: number }[]; events: { status: string; location: string | null; piece: string | null; at: string }[] } | null;
+
+/** QR labels encode the tracking URL; barcodes encode the raw ID. */
+export function extractCode(text: string) {
+  const t = text.trim();
+  try { const u = new URL(t); const id = u.searchParams.get("id"); if (id) return id.toUpperCase(); } catch { /* not a URL */ }
+  return t.toUpperCase();
+}
+
 const STATUSES = ["picked_up", "in_transit", "at_hub", "out_for_delivery", "delivered", "exception"] as const;
 
 function Scan() {
@@ -20,6 +29,7 @@ function Scan() {
   const [busy, setBusy] = useState(false);
   const [camOn, setCamOn] = useState(false);
   const [result, setResult] = useState<{ awb: string; piece: string | null; status: string } | null>(null);
+  const [info, setInfo] = useState<Info>(null);
   const scannerRef = useRef<{ stop: () => Promise<void> } | null>(null);
 
   useEffect(() => () => { scannerRef.current?.stop().catch(() => {}); }, []);
@@ -31,20 +41,26 @@ function Scan() {
     scannerRef.current = sc;
     try {
       await sc.start({ facingMode: "environment" }, { fps: 8, qrbox: { width: 220, height: 160 } }, (text) => {
-        setCode(text.trim().toUpperCase());
-        toast.success("Code captured");
+        const c = extractCode(text);
+        setCode(c);
+        toast.success(`Captured ${c}`);
+        void submitCode(c);
         sc.stop().catch(() => {}); setCamOn(false);
       }, () => {});
     } catch { toast.error("Camera not available — type the code instead."); setCamOn(false); }
   };
 
-  const submit = async () => {
-    if (!code.trim()) return;
+  const submit = () => submitCode(code);
+  const submitCode = async (raw: string) => {
+    const c = extractCode(raw);
+    if (!c) return;
     setBusy(true); setResult(null);
-    const { data, error } = await supabase.rpc("scan_piece", { _code: code.trim(), _status: status, ...(location.trim() ? { _location: location.trim() } : {}), ...(note.trim() ? { _note: note.trim() } : {}) });
+    const { data, error } = await supabase.rpc("scan_piece", { _code: c, _status: status, ...(location.trim() ? { _location: location.trim() } : {}), ...(note.trim() ? { _note: note.trim() } : {}) });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     setResult(data as { awb: string; piece: string | null; status: string });
+    const t = await supabase.rpc("track_shipment", { _tracking: c });
+    setInfo(t.data as Info);
     setCode("");
   };
 
@@ -85,6 +101,14 @@ function Scan() {
             <p className="font-bold">Saved: {result.status.replaceAll("_", " ")}</p>
             <p className="text-sm text-muted-foreground">{result.awb}{result.piece ? ` · ${result.piece}` : ""}</p>
           </div>
+        </div>
+      )}
+      {info && (
+        <div className="mt-3 rounded-3xl border bg-card p-4">
+          <p className="text-xs font-bold text-muted-foreground">Tracking updated · {info.tracking_number}</p>
+          <p className="font-display text-xl font-extrabold">{info.from_city} → {info.to_city}</p>
+          <div className="mt-2 flex flex-wrap gap-1">{info.pieces.map((p) => <span key={p.code} className="rounded-full border px-2 py-0.5 font-mono text-xs">{p.seq}/{p.total} {p.code}</span>)}</div>
+          <ol className="mt-3 space-y-1 text-sm">{info.events.slice(0, 5).map((e, i) => <li key={i}><b className="capitalize">{e.status.replaceAll("_", " ")}</b> <span className="text-muted-foreground">{e.location ?? ""} {e.piece ?? ""} · {new Date(e.at).toLocaleString("en-IN")}</span></li>)}</ol>
         </div>
       )}
     </AppShell>

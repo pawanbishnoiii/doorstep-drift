@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { quote } from "./pricing";
+import { couponDiscount, quote } from "./pricing";
 
 const party = {
   name: z.string().trim().min(2).max(100),
@@ -19,7 +19,32 @@ const input = z.object({
   contents: z.string().trim().max(200).optional(),
   declared_value: z.number().min(0).max(1_000_000).default(0),
   payment_method: z.enum(["cash_on_pickup", "online"]).default("cash_on_pickup"),
+  coupon_code: z.string().trim().toUpperCase().max(30).optional(),
+  pickup: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).optional(),
+  dims: z.object({ l: z.number().min(1).max(300), w: z.number().min(1).max(300), h: z.number().min(1).max(300) }).optional(),
 });
+
+async function resolveCoupon(code: string, userId: string, total: number) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: c } = await supabaseAdmin.from("coupons").select("*").eq("code", code).maybeSingle();
+  const now = Date.now();
+  if (!c || !c.active || new Date(c.starts_at).getTime() > now || (c.expires_at && new Date(c.expires_at).getTime() < now)) throw new Error("Coupon is invalid or expired.");
+  if (c.max_uses != null && c.used_count >= c.max_uses) throw new Error("Coupon usage limit reached.");
+  const { count } = await supabaseAdmin.from("coupon_redemptions").select("id", { count: "exact", head: true }).eq("coupon_id", c.id).eq("user_id", userId);
+  if ((count ?? 0) >= c.per_user_limit) throw new Error("You have already used this coupon.");
+  const d = couponDiscount(total, { discount_type: c.discount_type, discount_value: Number(c.discount_value), max_discount: c.max_discount == null ? null : Number(c.max_discount), min_order: Number(c.min_order) });
+  if (d <= 0) throw new Error(`Minimum order ₹${c.min_order} for this coupon.`);
+  return { coupon: c, discount: d };
+}
+
+/** Preview a coupon against a server-computed quote. */
+export const previewCoupon = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { code: string; total: number }) => z.object({ code: z.string().trim().toUpperCase().min(2).max(30), total: z.number().min(0).max(1e7) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const r = await resolveCoupon(data.code, context.userId, data.total);
+    return { code: r.coupon.code, discount: r.discount, description: r.coupon.description };
+  });
 
 export const createShipment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -37,7 +62,9 @@ export const createShipment = createServerFn({ method: "POST" })
     if (!to?.active) throw new Error(`Delivery pincode ${data.receiver.pincode} is not serviceable yet.`);
 
     const totalKg = data.pieces.reduce((a, p) => a + p.weight_kg, 0);
-    const q = quote({ fromPin: data.sender.pincode, toPin: data.receiver.pincode, weightKg: totalKg, service: data.service });
+    const q = quote({ fromPin: data.sender.pincode, toPin: data.receiver.pincode, weightKg: totalKg, service: data.service, dims: data.dims });
+    const cp = data.coupon_code ? await resolveCoupon(data.coupon_code, context.userId, q.total) : null;
+    const payable = Math.round((q.total - (cp?.discount ?? 0)) * 100) / 100;
 
     // Routing snapshot: origin Point owning the pickup pincode at booking time (never silently changed later)
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -57,7 +84,9 @@ export const createShipment = createServerFn({ method: "POST" })
       service: data.service,
       sender_name: data.sender.name, sender_phone: data.sender.phone, sender_address: data.sender.address, sender_pincode: data.sender.pincode, sender_city: data.sender.city,
       receiver_name: data.receiver.name, receiver_phone: data.receiver.phone, receiver_address: data.receiver.address, receiver_pincode: data.receiver.pincode, receiver_city: data.receiver.city,
-      weight_kg: q.weight, contents: data.contents ?? null, declared_value: data.declared_value, price: q.total,
+      weight_kg: q.weight, contents: data.contents ?? null, declared_value: data.declared_value, price: payable,
+      coupon_code: cp?.coupon.code ?? null, discount: cp?.discount ?? 0,
+      pickup_lat: data.pickup?.lat ?? null, pickup_lng: data.pickup?.lng ?? null, dims: data.dims ?? null,
       pieces_count: data.pieces.length,
       payment_method: data.payment_method,
       payment_status: "pending",
@@ -66,6 +95,10 @@ export const createShipment = createServerFn({ method: "POST" })
       routing_snapshot: { origin_state: from.state, origin_zone: from.zone, dest_state: to.state, dest_zone: to.zone, origin_point_user: alloc?.holder_user_id ?? null, quote: q },
     }).select("id, tracking_number, price, status").single();
     if (error) throw new Error(error.message);
+    if (cp) {
+      await supabaseAdmin.from("coupon_redemptions").insert({ coupon_id: cp.coupon.id, user_id: context.userId, shipment_id: row.id, discount: cp.discount });
+      await supabaseAdmin.from("coupons").update({ used_count: cp.coupon.used_count + 1 }).eq("id", cp.coupon.id);
+    }
 
     const pieceRows = [];
     for (const [i, p] of data.pieces.entries()) {
@@ -112,4 +145,26 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
     const { error } = await context.supabase.rpc("grant_staff_role", { _user_id: found, _role: data.role, ...(data.state ? { _state: data.state } : {}), ...(data.point_id ? { _point_id: data.point_id } : {}) });
     if (error) throw new Error(error.message);
     return { user_id: found };
+  });
+
+/**
+ * Razorpay DEMO mode: no real money moves. Records a demo payment and confirms the booking.
+ * Replace with real order creation + signature verification once RAZORPAY keys are added.
+ */
+export const demoPay = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { shipmentId: string; method: string; outcome: "success" | "failure" }) =>
+    z.object({ shipmentId: z.string().uuid(), method: z.enum(["upi", "card", "netbanking", "wallet"]), outcome: z.enum(["success", "failure"]) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: s } = await context.supabase.from("shipments").select("id,status,user_id,price").eq("id", data.shipmentId).maybeSingle();
+    if (!s || s.user_id !== context.userId) throw new Error("Shipment not found.");
+    if (s.status !== "awaiting_payment") throw new Error("This booking is not awaiting payment.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const ref = "pay_demo_" + crypto.randomUUID().replaceAll("-", "").slice(0, 14);
+    const ok = data.outcome === "success";
+    await supabaseAdmin.from("payments").insert({ shipment_id: s.id, user_id: context.userId, amount: s.price, method: data.method, provider_ref: ref, status: ok ? "captured" : "failed" });
+    if (!ok) return { ok: false, ref };
+    await supabaseAdmin.from("shipments").update({ status: "booked", payment_status: "paid_demo", updated_at: new Date().toISOString() }).eq("id", s.id);
+    await supabaseAdmin.from("tracking_events").insert({ shipment_id: s.id, status: "booked", note: `Demo payment ${ref} captured` });
+    return { ok: true, ref };
   });
