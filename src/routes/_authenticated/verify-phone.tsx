@@ -71,7 +71,7 @@ function VerifyPhone() {
                 </div>
               )}
               <p className="text-sm text-muted-foreground">Enter the 6-digit code for +91 {phone}</p>
-              <InputOTP maxLength={6} value={code} onChange={setCode}>
+              <InputOTP autoFocus maxLength={6} value={code} onChange={setCode}>
                 <InputOTPGroup className="w-full justify-between">{[0, 1, 2, 3, 4, 5].map((i) => <InputOTPSlot key={i} index={i} className="h-14 w-12 rounded-xl border text-xl font-bold" />)}</InputOTPGroup>
               </InputOTP>
               <button onClick={confirm} disabled={busy || code.length !== 6} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-ink font-bold text-ink-foreground disabled:opacity-50">{busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />} Verify</button>
