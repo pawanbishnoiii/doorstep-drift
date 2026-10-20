@@ -21,7 +21,7 @@ export const Route = createFileRoute("/track")({
   component: Track,
 });
 
-type Result = { tracking_number: string; status: string; service: string; from_city: string; to_city: string; created_at: string; events: { status: string; location: string | null; note: string | null; at: string }[] } | null;
+type Result = { tracking_number: string; status: string; service: string; from_city: string; to_city: string; created_at: string; pieces: { code: string; seq: number; total: number }[]; events: { status: string; location: string | null; note: string | null; piece: string | null; at: string }[] } | null;
 
 function Track() {
   const { id } = Route.useSearch();
@@ -55,12 +55,19 @@ function Track() {
                   <div><p className="text-xs font-bold text-muted-foreground">{data.tracking_number}</p><p className="font-display text-2xl font-extrabold">{data.from_city} → {data.to_city}</p></div>
                   <span className="rounded-full bg-lime px-3 py-1 text-sm font-bold capitalize">{data.status.replace("_", " ")}</span>
                 </div>
+                {data.pieces.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {data.pieces.map((p) => (
+                      <span key={p.code} className="rounded-full border px-3 py-1 font-mono text-xs font-bold">Parcel {p.seq}/{p.total} · {p.code}</span>
+                    ))}
+                  </div>
+                )}
                 <ol className="mt-6 space-y-5 border-l-2 border-primary/30 pl-6">
                   {data.events.map((e, i) => (
                     <li key={i} className="relative">
                       <CircleDot className={`absolute -left-[34px] top-0.5 h-5 w-5 bg-card ${i === 0 ? "text-primary" : "text-muted-foreground"}`} />
                       <p className="font-bold capitalize">{e.status.replace("_", " ")}</p>
-                      <p className="text-sm text-muted-foreground">{[e.location, e.note].filter(Boolean).join(" · ")}</p>
+                      <p className="text-sm text-muted-foreground">{[e.piece, e.location, e.note].filter(Boolean).join(" · ")}</p>
                       <p className="text-xs text-muted-foreground">{new Date(e.at).toLocaleString("en-IN")}</p>
                     </li>
                   ))}
