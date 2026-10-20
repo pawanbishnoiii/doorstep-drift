@@ -114,7 +114,7 @@ function QuickQuote() {
   );
 }
 
-function Field({ label, value, onChange, ...rest }: { label: string; value: string; onChange: (v: string) => void } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Field({ label, value, onChange, ...rest }: { label: string; value: string; onChange: (v: string) => void } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">) {
   return (
     <label className="rounded-2xl border bg-background px-3 py-2 focus-within:ring-2 focus-within:ring-ring">
       <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>

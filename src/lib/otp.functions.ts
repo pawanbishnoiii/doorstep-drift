@@ -21,7 +21,7 @@ export const sendPhoneOtp = createServerFn({ method: "POST" })
     if ((count ?? 0) > 0) throw new Error("Please wait a minute before requesting another code.");
     const n = new Uint32Array(1);
     crypto.getRandomValues(n);
-    const code = String(n[0] % 1_000_000).padStart(6, "0");
+    const code = String((n[0] ?? 0) % 1_000_000).padStart(6, "0");
     const { error } = await supabaseAdmin.from("phone_otps").insert({
       user_id: context.userId,
       phone: data.phone,

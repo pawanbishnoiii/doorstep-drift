@@ -37,9 +37,9 @@ export function useLandingMotion(root: RefObject<HTMLElement | null>) {
           gsap.from(card, { x: i % 2 ? 70 : -70, opacity: 0, ease: "power3.out", scrollTrigger: { trigger: card, start: "top 85%", end: "top 60%", scrub: 1 } }),
         );
         gsap.utils.toArray<HTMLElement>(".count-up").forEach((el) => {
-          const end = Number(el.dataset.to ?? 0);
+          const end = Number(el.dataset["to"] ?? 0);
           const obj = { v: 0 };
-          gsap.to(obj, { v: end, duration: 1.6, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 90%", once: true }, onUpdate: () => { el.textContent = Math.round(obj.v).toLocaleString("en-IN") + (el.dataset.suffix ?? ""); } });
+          gsap.to(obj, { v: end, duration: 1.6, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 90%", once: true }, onUpdate: () => { el.textContent = Math.round(obj.v).toLocaleString("en-IN") + (el.dataset["suffix"] ?? ""); } });
         });
       }, root);
       cleanup = () => { cancelAnimationFrame(frame); lenis.destroy(); ctx.revert(); };

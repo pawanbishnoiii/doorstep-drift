@@ -166,9 +166,9 @@ function ApplySection() {
     e.preventDefault();
     if (!user) return;
     const parsed = schema.safeParse(Object.fromEntries(new FormData(e.currentTarget)));
-    if (!parsed.success) { toast.error(parsed.error.issues[0].message + ` (${parsed.error.issues[0].path[0]})`); return; }
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Check the form"); return; }
     setBusy(true);
-    const { error } = await supabase.from("point_applications").insert({ ...parsed.data, user_id: user.id });
+    const { error } = await supabase.from("point_applications").insert({ ...parsed.data, message: parsed.data.message ?? null, user_id: user.id });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Application submitted! We'll call you within 48 hours.");
@@ -206,7 +206,7 @@ function ApplySection() {
             </div>
           ) : (
             <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
-              <input name="full_name" placeholder="Your full name" className={input} defaultValue={user.user_metadata?.full_name ?? ""} />
+              <input name="full_name" placeholder="Your full name" className={input} defaultValue={user.user_metadata?.["full_name"] ?? ""} />
               <input name="phone" placeholder="Mobile (10 digits)" inputMode="numeric" maxLength={10} className={input} />
               <input name="email" type="email" placeholder="Email" className={input} defaultValue={user.email ?? ""} />
               <input name="business_name" placeholder="Shop / business name" className={input} />

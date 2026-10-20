@@ -39,7 +39,7 @@ function Ship() {
 
   const next = () => {
     const target = step === 0 ? sender : step === 1 ? receiver : null;
-    if (target) { const r = partySchema.safeParse(target); if (!r.success) return toast.error(r.error.issues[0].message); }
+    if (target) { const r = partySchema.safeParse(target); if (!r.success) { toast.error(r.error.issues[0]?.message ?? "Check the form"); return; } }
     setStep(step + 1);
   };
   const submit = async () => {
@@ -121,7 +121,7 @@ function Row({ k, v }: { k: string; v: string }) {
   return <div className="flex justify-between gap-4 text-sm"><span className="text-muted-foreground">{k}</span><span className="text-right font-semibold">{v}</span></div>;
 }
 
-function Input({ label, value, onChange, ...rest }: { label: string; value: string; onChange: (v: string) => void } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({ label, value, onChange, ...rest }: { label: string; value: string; onChange: (v: string) => void } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">) {
   return (
     <label className="block rounded-2xl border bg-card px-4 py-2.5 focus-within:ring-2 focus-within:ring-ring">
       <span className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>

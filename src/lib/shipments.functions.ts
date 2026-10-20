@@ -29,7 +29,7 @@ export const createShipment = createServerFn({ method: "POST" })
     const q = quote({ fromPin: data.sender.pincode, toPin: data.receiver.pincode, weightKg: data.weight_kg, service: data.service });
     const n = new Uint32Array(2);
     crypto.getRandomValues(n);
-    const tracking = `DBX${String(n[0]).padStart(10, "0").slice(0, 10)}`;
+    const tracking = `DBX${String(n[0] ?? 0).padStart(10, "0").slice(0, 10)}`;
     const { data: row, error } = await context.supabase.from("shipments").insert({
       tracking_number: tracking,
       user_id: context.userId,

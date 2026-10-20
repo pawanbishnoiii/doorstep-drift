@@ -50,7 +50,7 @@ function AuthPage() {
   const emailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const p = z.object({ email: z.string().email(), password: z.string().min(8, "Password needs 8+ characters") }).safeParse({ email, password });
-    if (!p.success) { toast.error(p.error.issues[0].message); return; }
+    if (!p.success) { toast.error(p.error.issues[0]?.message ?? "Invalid"); return; }
     setBusy(true);
     if (mode === "in") {
       const { error } = await supabase.auth.signInWithPassword(p.data);

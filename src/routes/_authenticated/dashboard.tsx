@@ -22,7 +22,7 @@ function Dashboard() {
     },
     enabled: !!me?.user,
   });
-  const name = (me?.user.user_metadata?.full_name as string | undefined)?.split(" ")[0] ?? "there";
+  const name = (me?.user.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0] ?? "there";
   return (
     <AppShell>
       <h1 className="font-display text-4xl font-extrabold tracking-tight">Hi {name} 👋</h1>
