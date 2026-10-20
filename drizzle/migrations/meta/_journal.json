@@ -8,6 +8,13 @@
       "when": 1792524139294,
       "tag": "0000_p0_role_enum",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792524173255,
+      "tag": "0001_p0_pincodes_awb_pieces_labels",
+      "breakpoints": true
     }
   ]
 }

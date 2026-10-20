@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          entity: string
+          entity_id: string | null
+          id: string
+          meta: Json
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          entity: string
+          entity_id?: string | null
+          id?: string
+          meta?: Json
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          meta?: Json
+        }
+        Relationships: []
+      }
       health_checks: {
         Row: {
           checked_at: string
@@ -37,6 +67,38 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      label_prints: {
+        Row: {
+          created_at: string
+          id: string
+          piece_id: string
+          printed_by: string
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          piece_id: string
+          printed_by: string
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          piece_id?: string
+          printed_by?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "label_prints_piece_id_fkey"
+            columns: ["piece_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_pieces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       phone_otps: {
         Row: {
@@ -68,6 +130,80 @@ export type Database = {
           id?: string
           phone?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      pincode_allocations: {
+        Row: {
+          assigned_by: string
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          holder_role: Database["public"]["Enums"]["app_role"]
+          holder_user_id: string
+          id: string
+          note: string | null
+          pincode: string
+          status: string
+        }
+        Insert: {
+          assigned_by: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          holder_role: Database["public"]["Enums"]["app_role"]
+          holder_user_id: string
+          id?: string
+          note?: string | null
+          pincode: string
+          status?: string
+        }
+        Update: {
+          assigned_by?: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          holder_role?: Database["public"]["Enums"]["app_role"]
+          holder_user_id?: string
+          id?: string
+          note?: string | null
+          pincode?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pincode_allocations_pincode_fkey"
+            columns: ["pincode"]
+            isOneToOne: false
+            referencedRelation: "pincodes"
+            referencedColumns: ["pincode"]
+          },
+        ]
+      }
+      pincodes: {
+        Row: {
+          active: boolean
+          city: string
+          pincode: string
+          state: string
+          tier: string | null
+          zone: string | null
+        }
+        Insert: {
+          active?: boolean
+          city: string
+          pincode: string
+          state: string
+          tier?: string | null
+          zone?: string | null
+        }
+        Update: {
+          active?: boolean
+          city?: string
+          pincode?: string
+          state?: string
+          tier?: string | null
+          zone?: string | null
         }
         Relationships: []
       }
@@ -161,18 +297,64 @@ export type Database = {
         }
         Relationships: []
       }
+      shipment_pieces: {
+        Row: {
+          contents: string | null
+          created_at: string
+          id: string
+          piece_code: string
+          seq_no: number
+          shipment_id: string
+          total: number
+          weight_kg: number | null
+        }
+        Insert: {
+          contents?: string | null
+          created_at?: string
+          id?: string
+          piece_code: string
+          seq_no: number
+          shipment_id: string
+          total: number
+          weight_kg?: number | null
+        }
+        Update: {
+          contents?: string | null
+          created_at?: string
+          id?: string
+          piece_code?: string
+          seq_no?: number
+          shipment_id?: string
+          total?: number
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_pieces_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipments: {
         Row: {
           contents: string | null
           created_at: string
           declared_value: number | null
           id: string
+          origin_point_id: string | null
+          payment_method: string
+          payment_status: string
+          pieces_count: number
           price: number
           receiver_address: string
           receiver_city: string
           receiver_name: string
           receiver_phone: string
           receiver_pincode: string
+          routing_snapshot: Json
           sender_address: string
           sender_city: string
           sender_name: string
@@ -190,12 +372,17 @@ export type Database = {
           created_at?: string
           declared_value?: number | null
           id?: string
+          origin_point_id?: string | null
+          payment_method?: string
+          payment_status?: string
+          pieces_count?: number
           price: number
           receiver_address: string
           receiver_city: string
           receiver_name: string
           receiver_phone: string
           receiver_pincode: string
+          routing_snapshot?: Json
           sender_address: string
           sender_city: string
           sender_name: string
@@ -213,12 +400,17 @@ export type Database = {
           created_at?: string
           declared_value?: number | null
           id?: string
+          origin_point_id?: string | null
+          payment_method?: string
+          payment_status?: string
+          pieces_count?: number
           price?: number
           receiver_address?: string
           receiver_city?: string
           receiver_name?: string
           receiver_phone?: string
           receiver_pincode?: string
+          routing_snapshot?: Json
           sender_address?: string
           sender_city?: string
           sender_name?: string
@@ -231,7 +423,56 @@ export type Database = {
           user_id?: string
           weight_kg?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "shipments_origin_point_id_fkey"
+            columns: ["origin_point_id"]
+            isOneToOne: false
+            referencedRelation: "point_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_scopes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          point_id: string | null
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          state: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          point_id?: string | null
+          revoked_at?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          state?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          point_id?: string | null
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          state?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_scopes_point_id_fkey"
+            columns: ["point_id"]
+            isOneToOne: false
+            referencedRelation: "point_applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tracking_events: {
         Row: {
@@ -239,6 +480,7 @@ export type Database = {
           id: string
           location: string | null
           note: string | null
+          piece_id: string | null
           shipment_id: string
           status: string
         }
@@ -247,6 +489,7 @@ export type Database = {
           id?: string
           location?: string | null
           note?: string | null
+          piece_id?: string | null
           shipment_id: string
           status: string
         }
@@ -255,10 +498,18 @@ export type Database = {
           id?: string
           location?: string | null
           note?: string | null
+          piece_id?: string | null
           shipment_id?: string
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tracking_events_piece_id_fkey"
+            columns: ["piece_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_pieces"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tracking_events_shipment_id_fkey"
             columns: ["shipment_id"]
@@ -298,6 +549,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      next_awb: { Args: never; Returns: string }
+      next_piece_code: { Args: never; Returns: string }
       track_shipment: { Args: { _tracking: string }; Returns: Json }
     }
     Enums: {
