@@ -30,7 +30,7 @@ function Dashboard() {
 
   const claim = async () => {
     const { error } = await supabase.rpc("claim_first_admin");
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("You are now the Admin");
     qc.invalidateQueries();
   };

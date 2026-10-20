@@ -22,7 +22,7 @@ export function zoneOf(fromPin: string, toPin: string): "local" | "regional" | "
 
 const zoneMultiplier = { local: 1, regional: 1.25, national: 1.6 } as const;
 
-export function quote(params: { fromPin: string; toPin: string; weightKg: number; service: ServiceLevel; dims?: { l: number; w: number; h: number } }) {
+export function quote(params: { fromPin: string; toPin: string; weightKg: number; service: ServiceLevel; dims?: { l: number; w: number; h: number } | undefined }) {
   const s = services[params.service];
   const weight = billableWeight(params.weightKg, params.dims);
   const zone = zoneOf(params.fromPin, params.toPin);
