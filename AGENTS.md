@@ -16,3 +16,9 @@
 - Signed-in pages live under `src/routes/_authenticated/` and use `AppShell`, which gates on a verified phone.
 - DB health is probed by `/api/public/health-check`, called by a managed 4-hourly schedule.
 - Brand name/domain/contacts are centralised in `src/lib/brand.ts`.
+- Role hierarchy is Admin → state_director → state_manager → area_manager → point; `network` is a separate ops role. Grants go through the `grant_staff_role` DB function, pincode scope through `allocate_pincode`/`release_pincode` — never direct table writes.
+- Pincode master data lives in `public.pincodes` (24k rows, CSV-imported, audited via `import_pincodes`). Booking rejects unserviceable pincodes.
+- Every booking gets a master AWB from `next_awb()` plus one `shipment_pieces` row + `next_piece_code()` per physical parcel. IDs come from the `awb_seq` sequence server-side and are never reused.
+- Labels are generated client-side (`src/lib/labels.ts`, bwip-js Code 128 + qrcode + jsPDF) from saved records; every print/reprint is logged in `label_prints` and reprints require a reason. `awaiting_payment`/`cancelled` shipments cannot print.
+- Staff scan parcels via `/scan` → `scan_piece` rpc (staff-only, writes tracking_events + audit_logs). Shipment visibility is pincode-scoped through `can_access_pincode`.
+- Public base URL for QR/tracking links: `publicBaseUrl()` in `src/lib/brand.ts` (env `VITE_PUBLIC_BASE_URL`).
