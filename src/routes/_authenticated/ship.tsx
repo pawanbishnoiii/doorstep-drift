@@ -11,7 +11,7 @@ import { createShipment } from "@/lib/shipments.functions";
 import { quote, services, type ServiceLevel } from "@/lib/pricing";
 
 export const Route = createFileRoute("/_authenticated/ship")({
-  validateSearch: (s) => z.object({ from: z.string().optional(), to: z.string().optional(), kg: z.string().optional(), svc: z.enum(["standard", "express", "same_day"]).optional() }).parse(s),
+  validateSearch: (s) => z.object({ from: z.coerce.string().optional(), to: z.coerce.string().optional(), kg: z.coerce.string().optional(), svc: z.enum(["standard", "express", "same_day"]).optional() }).parse(s),
   head: () => ({ meta: [{ title: "Book a pickup — DropBox" }, { name: "description", content: "Book a doorstep courier pickup." }, { property: "og:title", content: "Book a pickup — DropBox" }, { property: "og:description", content: "Book a doorstep courier pickup." }] }),
   component: Ship,
 });
