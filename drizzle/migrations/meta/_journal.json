@@ -29,6 +29,13 @@
       "when": 1792525835868,
       "tag": "0003_p1_admin_coupons_payments_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792525899515,
+      "tag": "0004_p1_signup_profile_trigger",
+      "breakpoints": true
     }
   ]
 }
