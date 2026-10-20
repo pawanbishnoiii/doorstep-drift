@@ -7,7 +7,9 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/site/AppShell";
-import { createShipment } from "@/lib/shipments.functions";
+import { createShipment, previewCoupon } from "@/lib/shipments.functions";
+import { LocationPicker } from "@/components/site/LocationPicker";
+import { geocodePincode } from "@/lib/geo";
 import { searchPincodes } from "@/lib/pincodes.functions";
 import { quote, services, type ServiceLevel } from "@/lib/pricing";
 
@@ -17,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/ship")({
   component: Ship,
 });
 
-type Party = { name: string; phone: string; address: string; pincode: string; city: string };
+type Party = { name: string; phone: string; address: string; pincode: string; city: string; lat?: number; lng?: number };
 const empty: Party = { name: "", phone: "", address: "", pincode: "", city: "" };
 const partySchema = z.object({ name: z.string().trim().min(2, "Name required"), phone: z.string().regex(/^[6-9]\d{9}$/, "10-digit mobile"), address: z.string().trim().min(8, "Full address"), pincode: z.string().regex(/^\d{6}$/, "6-digit pincode"), city: z.string().trim().min(2, "City required") });
 
@@ -65,11 +67,17 @@ function Ship() {
   const [value, setValue] = useState("0");
   const [pay, setPay] = useState<"cash_on_pickup" | "online">("cash_on_pickup");
   const [busy, setBusy] = useState(false);
+  const [dims, setDims] = useState({ l: "", w: "", h: "" });
+  const [coupon, setCoupon] = useState("");
+  const [applied, setApplied] = useState<{ code: string; discount: number } | null>(null);
+  const previewC = useServerFn(previewCoupon);
   const [done, setDone] = useState<{ id: string; tracking_number: string; price: number; status: string } | null>(null);
 
+  const dimsN = dims.l && dims.w && dims.h ? { l: Number(dims.l), w: Number(dims.w), h: Number(dims.h) } : undefined;
   const totalKg = weights.reduce((a, w) => a + (Number(w) || 0), 0);
-  const q = /^\d{6}$/.test(sender.pincode) && /^\d{6}$/.test(receiver.pincode) && totalKg > 0 ? quote({ fromPin: sender.pincode, toPin: receiver.pincode, weightKg: totalKg, service: svc }) : null;
+  const q = /^\d{6}$/.test(sender.pincode) && /^\d{6}$/.test(receiver.pincode) && totalKg > 0 ? quote({ fromPin: sender.pincode, toPin: receiver.pincode, weightKg: totalKg, service: svc, dims: dimsN }) : null;
 
+  const payable = q ? Math.round((q.total - (applied?.discount ?? 0)) * 100) / 100 : 0;
   const next = () => {
     const target = step === 0 ? sender : step === 1 ? receiver : null;
     if (target) { const r = partySchema.safeParse(target); if (!r.success) { toast.error(r.error.issues[0]?.message ?? "Check the form"); return; } }
@@ -78,7 +86,9 @@ function Ship() {
   const submit = async () => {
     setBusy(true);
     try {
-      const r = await create({ data: { service: svc, sender, receiver, pieces: weights.map((w) => ({ weight_kg: Number(w) || 0.5 })), contents, declared_value: Number(value) || 0, payment_method: pay } });
+      const r = await create({ data: { service: svc, sender: strip(sender), receiver: strip(receiver), pieces: weights.map((w) => ({ weight_kg: Number(w) || 0.5 })), contents, declared_value: Number(value) || 0, payment_method: pay, ...(applied ? { coupon_code: applied.code } : {}), ...(dimsN ? { dims: dimsN } : {}), ...(sender.lat != null && sender.lng != null ? { pickup: { lat: sender.lat, lng: sender.lng } } : {}) } });
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      if (r.status === "awaiting_payment") { navigate({ to: "/pay/$shipmentId", params: { shipmentId: r.id } }); return; }
       setDone(r);
       qc.invalidateQueries({ queryKey: ["my-shipments"] });
     } catch (e) { toast.error((e as Error).message); }
@@ -93,9 +103,6 @@ function Ship() {
         <p className="mt-2 text-muted-foreground">Master AWB</p>
         <p className="font-display text-3xl font-extrabold tracking-wider">{done.tracking_number}</p>
         <p className="mt-2 font-bold">Total ₹{done.price} · {weights.length} parcel{weights.length > 1 ? "s" : ""}</p>
-        {done.status === "awaiting_payment" && (
-          <p className="mt-3 rounded-2xl bg-amber-50 p-3 text-sm font-semibold text-amber-900">Online payment gateway is not connected yet. Your booking is saved — switch to pay-at-pickup from My shipments to confirm it.</p>
-        )}
         <div className="mt-6 flex gap-2">
           {done.status !== "awaiting_payment" && (
             <button onClick={() => navigate({ to: "/labels/$shipmentId", params: { shipmentId: done.id } })} className="h-12 flex-1 rounded-2xl bg-primary font-bold text-primary-foreground">Print labels</button>
@@ -131,6 +138,11 @@ function Ship() {
               {weights.length < 50 && (
                 <button onClick={() => setWeights([...weights, "1"])} className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-dashed font-bold text-muted-foreground"><Plus className="h-4 w-4" /> Add another parcel</button>
               )}
+              <p className="pt-2 text-sm font-bold text-muted-foreground">Box size (cm) — volumetric weight = L×W×H ÷ 5000</p>
+              <div className="grid grid-cols-3 gap-2">
+                {(["l", "w", "h"] as const).map((k) => <Input key={k} label={k.toUpperCase()} value={dims[k]} inputMode="decimal" onChange={(v) => setDims({ ...dims, [k]: v.replace(/[^\d.]/g, "") })} />)}
+              </div>
+              {dimsN && <p className="text-xs font-semibold text-muted-foreground">Volumetric: {((dimsN.l * dimsN.w * dimsN.h) / 5000).toFixed(2)} kg · actual {totalKg} kg — the higher is billed.</p>}
               <Input label="What's inside?" value={contents} onChange={setContents} />
               <Input label="Declared value (₹)" value={value} onChange={setValue} inputMode="numeric" />
               <div className="grid gap-2">
@@ -151,10 +163,18 @@ function Ship() {
               <Row k="Billable weight" v={`${q.weight} kg (${q.zone})`} />
               <Row k="Freight" v={`₹${q.freight}`} />
               <Row k="GST 18%" v={`₹${q.gst}`} />
-              <div className="flex justify-between border-t pt-3 font-display text-2xl font-extrabold"><span>Total</span><span>₹{q.total}</span></div>
+              <div className="flex gap-2 pt-1">
+                <input value={coupon} onChange={(e) => setCoupon(e.target.value.toUpperCase())} placeholder="Coupon code" className="h-11 flex-1 rounded-xl border bg-background px-3 font-mono text-sm font-bold outline-none" />
+                <button type="button" onClick={async () => {
+                  if (applied) { setApplied(null); setCoupon(""); return; }
+                  try { const r = await previewC({ data: { code: coupon, total: q.total } }); setApplied(r); toast.success(`${r.code} applied: −₹${r.discount}`); } catch (e) { toast.error((e as Error).message); }
+                }} className="h-11 rounded-xl bg-ink px-4 text-sm font-bold text-ink-foreground">{applied ? "Remove" : "Apply"}</button>
+              </div>
+              {applied && <Row k={`Coupon ${applied.code}`} v={`−₹${applied.discount}`} />}
+              <div className="flex justify-between border-t pt-3 font-display text-2xl font-extrabold"><span>Total</span><span>₹{payable}</span></div>
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <button onClick={() => setPay("cash_on_pickup")} className={`rounded-2xl border p-3 text-left text-sm font-bold ${pay === "cash_on_pickup" ? "border-primary bg-primary/5 ring-2 ring-primary" : ""}`}>Pay at pickup<span className="block text-xs font-semibold text-muted-foreground">Cash / UPI to rider</span></button>
-                <button onClick={() => setPay("online")} className={`rounded-2xl border p-3 text-left text-sm font-bold ${pay === "online" ? "border-primary bg-primary/5 ring-2 ring-primary" : ""}`}>Pay online<span className="block text-xs font-semibold text-muted-foreground">Gateway coming soon</span></button>
+                <button onClick={() => setPay("online")} className={`rounded-2xl border p-3 text-left text-sm font-bold ${pay === "online" ? "border-primary bg-primary/5 ring-2 ring-primary" : ""}`}>Pay online<span className="block text-xs font-semibold text-muted-foreground">UPI / card (demo mode)</span></button>
               </div>
             </div>
           )}
@@ -165,7 +185,7 @@ function Ship() {
         {step < 3 ? (
           <button onClick={next} className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-primary font-bold text-primary-foreground">Continue <ArrowRight className="h-5 w-5" /></button>
         ) : (
-          <button onClick={submit} disabled={busy || !q} className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-ink font-bold text-ink-foreground">{busy && <Loader2 className="h-5 w-5 animate-spin" />} Book pickup · ₹{q?.total}</button>
+          <button onClick={submit} disabled={busy || !q} className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-ink font-bold text-ink-foreground">{busy && <Loader2 className="h-5 w-5 animate-spin" />} Book pickup · ₹{payable}</button>
         )}
       </div>
     </AppShell>
@@ -185,14 +205,29 @@ function Input({ label, value, onChange, ...rest }: { label: string; value: stri
   );
 }
 
+const strip = ({ lat: _a, lng: _b, ...p }: Party) => p;
+
 function PartyForm({ v, set }: { v: Party; set: (p: Party) => void }) {
+  const search = useServerFn(searchPincodes);
   return (
     <>
+      <LocationPicker point={v.lat != null && v.lng != null ? { lat: v.lat, lng: v.lng } : null} onResolve={async (h) => {
+        let pincode = v.pincode, city = v.city;
+        if (h.pincode && /^\d{6}$/.test(h.pincode)) {
+          const rows = (await search({ data: { q: h.pincode } }).catch(() => [])) as PinSuggestion[];
+          const m = rows.find((r) => r.pincode === h.pincode);
+          if (m) { pincode = m.pincode; city = m.city; } else toast.error(`Pincode ${h.pincode} is not serviceable yet`);
+        }
+        set({ ...v, lat: h.lat, lng: h.lng, pincode, city: city || h.city || v.city, address: v.address || h.label.split(",").slice(0, 4).join(",").trim() });
+      }} />
       <Input label="Full name" value={v.name} onChange={(name) => set({ ...v, name })} />
       <Input label="Mobile" value={v.phone} onChange={(phone) => set({ ...v, phone: phone.replace(/\D/g, "") })} inputMode="numeric" maxLength={10} />
       <Input label="Address" value={v.address} onChange={(address) => set({ ...v, address })} />
       <div className="grid grid-cols-2 items-start gap-3">
-        <PincodeInput value={v.pincode} onPick={(pincode, city) => set({ ...v, pincode, city: city || v.city })} />
+        <PincodeInput value={v.pincode} onPick={async (pincode, city) => {
+          set({ ...v, pincode, city: city || v.city });
+          if (city) { const g = await geocodePincode(pincode, city).catch(() => null); if (g) set({ ...v, pincode, city, lat: g.lat, lng: g.lng }); }
+        }} />
         <Input label="City" value={v.city} onChange={(city) => set({ ...v, city })} />
       </div>
     </>
