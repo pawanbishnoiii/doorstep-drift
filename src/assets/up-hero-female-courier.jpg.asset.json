@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "dad841e8-c4b4-428e-aad6-46c93e32f569",
-  "project_id": "cdf53dc3-215d-4af6-997f-5a3ba76a6809",
-  "url": "/__l5e/assets-v1/dad841e8-c4b4-428e-aad6-46c93e32f569/hero-female-courier.jpg",
-  "r2_key": "a/v1/cdf53dc3-215d-4af6-997f-5a3ba76a6809/dad841e8-c4b4-428e-aad6-46c93e32f569/hero-female-courier.jpg",
-  "original_filename": "hero-female-courier.jpg",
-  "size": 99147,
   "content_type": "image/jpeg",
-  "created_at": "2026-10-20T18:22:38Z"
+  "created_at": "2026-10-20T18:22:38Z",
+  "original_filename": "hero-female-courier.jpg",
+  "project_id": "6d84fdc7-46d1-4c5e-989a-fc358b74f6b0",
+  "r2_key": "a/v1/6d84fdc7-46d1-4c5e-989a-fc358b74f6b0/dad841e8-c4b4-428e-aad6-46c93e32f569/hero-female-courier.jpg",
+  "size": 99147,
+  "url": "/__l5e/assets-v1/dad841e8-c4b4-428e-aad6-46c93e32f569/hero-female-courier.jpg",
+  "version": 1
 }
