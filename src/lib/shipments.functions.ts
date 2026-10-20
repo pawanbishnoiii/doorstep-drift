@@ -109,7 +109,7 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
       if (!list || list.users.length < 200) break;
     }
     if (!found) throw new Error("No account with that email. Ask them to sign in once first.");
-    const { error } = await context.supabase.rpc("grant_staff_role", { _user_id: found, _role: data.role, _state: data.state ?? undefined, _point_id: data.point_id ?? undefined });
+    const { error } = await context.supabase.rpc("grant_staff_role", { _user_id: found, _role: data.role, ...(data.state ? { _state: data.state } : {}), ...(data.point_id ? { _point_id: data.point_id } : {}) });
     if (error) throw new Error(error.message);
     return { user_id: found };
   });

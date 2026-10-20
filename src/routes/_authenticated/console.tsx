@@ -60,7 +60,7 @@ function Console() {
       <h1 className="font-display text-3xl font-extrabold">Staff console</h1>
       <div className="mt-1 flex flex-wrap gap-1.5">
         {roles?.map((r) => <span key={r} className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{ROLE_LABEL[r] ?? r}</span>)}
-        {scopes.map((s) => <span key={s.id} className="rounded-full bg-muted px-3 py-1 text-xs font-bold">{s.state ?? "Point"}</span>)}
+        {(scopes ?? []).map((s) => <span key={s.id} className="rounded-full bg-muted px-3 py-1 text-xs font-bold">{s.state ?? "Point"}</span>)}
       </div>
       <div className="mt-5 flex gap-1.5 overflow-x-auto">
         {([["allocations", MapPin, "Pincodes"], ["staff", Users, "Staff"], ["import", Upload, "Import"], ["audit", ShieldCheck, "Audit"]] as const).map(([t, Icon, label]) => (
@@ -186,7 +186,7 @@ function StaffForm({ roles }: { roles: string[] }) {
       <button disabled={busy || !email || grantable.length === 0} onClick={async () => {
         setBusy(true);
         try {
-          await grant({ data: { email, role: role as "area_manager", state: state || undefined } });
+          await grant({ data: { email, role: role as "area_manager", ...(state ? { state } : {}) } });
           toast.success(`Role granted to ${email}`); setEmail("");
         } catch (e) { toast.error((e as Error).message); }
         setBusy(false);
@@ -216,7 +216,7 @@ function ImportPanel({ isAdmin }: { isAdmin: boolean }) {
             const header = lines[0]!.toLowerCase();
             if (!header.includes("pincode") || !header.includes("city")) throw new Error("CSV must have Pincode, City, State columns.");
             const rows = lines.slice(1).map((l) => {
-              const [pincode, city, state, tier, zone] = l.split(",").map((c) => c?.trim().replace(/^"|"$/g, "") ?? "");
+              const [pincode = "", city = "", state = "", tier = "", zone = ""] = l.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
               return { pincode, city, state, tier, zone };
             }).filter((r) => /^\d{6}$/.test(r.pincode) && r.city && r.state);
             let total = 0;

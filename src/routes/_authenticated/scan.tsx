@@ -41,7 +41,7 @@ function Scan() {
   const submit = async () => {
     if (!code.trim()) return;
     setBusy(true); setResult(null);
-    const { data, error } = await supabase.rpc("scan_piece", { _code: code.trim(), _status: status, _location: location.trim() || null, _note: note.trim() || null });
+    const { data, error } = await supabase.rpc("scan_piece", { _code: code.trim(), _status: status, ...(location.trim() ? { _location: location.trim() } : {}), ...(note.trim() ? { _note: note.trim() } : {}) });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     setResult(data as { awb: string; piece: string | null; status: string });
