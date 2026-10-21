@@ -268,6 +268,72 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_settings: {
+        Row: {
+          admin_alert_email: string | null
+          alert_on_application: boolean
+          alert_on_booking: boolean
+          api_enabled: boolean
+          id: boolean
+          otp_provider: string
+          otp_sender_id: string | null
+          payment_key_id: string | null
+          payment_live: boolean
+          payment_provider: string
+          smtp_from: string | null
+          smtp_host: string | null
+          smtp_port: number | null
+          smtp_provider: string
+          smtp_user: string | null
+          updated_at: string
+          webhook_url: string | null
+          whatsapp_enabled: boolean
+          whatsapp_number: string | null
+        }
+        Insert: {
+          admin_alert_email?: string | null
+          alert_on_application?: boolean
+          alert_on_booking?: boolean
+          api_enabled?: boolean
+          id?: boolean
+          otp_provider?: string
+          otp_sender_id?: string | null
+          payment_key_id?: string | null
+          payment_live?: boolean
+          payment_provider?: string
+          smtp_from?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_provider?: string
+          smtp_user?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+          whatsapp_enabled?: boolean
+          whatsapp_number?: string | null
+        }
+        Update: {
+          admin_alert_email?: string | null
+          alert_on_application?: boolean
+          alert_on_booking?: boolean
+          api_enabled?: boolean
+          id?: boolean
+          otp_provider?: string
+          otp_sender_id?: string | null
+          payment_key_id?: string | null
+          payment_live?: boolean
+          payment_provider?: string
+          smtp_from?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_provider?: string
+          smtp_user?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+          whatsapp_enabled?: boolean
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       label_prints: {
         Row: {
           created_at: string
@@ -693,41 +759,62 @@ export type Database = {
       profiles: {
         Row: {
           account_type: string
+          address: string | null
+          age: number | null
           avatar_url: string | null
           business_name: string | null
           city: string | null
           created_at: string
           full_name: string | null
+          gender: string | null
           id: string
           last_seen_at: string | null
+          lat: number | null
+          lng: number | null
+          onboarded_at: string | null
           phone: string | null
           phone_verified: boolean
+          pincode: string | null
           updated_at: string
         }
         Insert: {
           account_type?: string
+          address?: string | null
+          age?: number | null
           avatar_url?: string | null
           business_name?: string | null
           city?: string | null
           created_at?: string
           full_name?: string | null
+          gender?: string | null
           id: string
           last_seen_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          onboarded_at?: string | null
           phone?: string | null
           phone_verified?: boolean
+          pincode?: string | null
           updated_at?: string
         }
         Update: {
           account_type?: string
+          address?: string | null
+          age?: number | null
           avatar_url?: string | null
           business_name?: string | null
           city?: string | null
           created_at?: string
           full_name?: string | null
+          gender?: string | null
           id?: string
           last_seen_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          onboarded_at?: string | null
           phone?: string | null
           phone_verified?: boolean
+          pincode?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1004,6 +1091,36 @@ export type Database = {
           },
         ]
       }
+      state_rates: {
+        Row: {
+          active: boolean
+          base: number
+          per_kg: number
+          service: string
+          set_by: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base: number
+          per_kg: number
+          service: string
+          set_by?: string | null
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base?: number
+          per_kg?: number
+          service?: string
+          set_by?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tracking_events: {
         Row: {
           created_at: string
@@ -1184,6 +1301,7 @@ export type Database = {
       next_piece_code: { Args: never; Returns: string }
       receive_manifest: { Args: { _manifest_id: string }; Returns: undefined }
       release_pincode: { Args: { _allocation_id: string }; Returns: undefined }
+      scan_bag_code: { Args: { _code: string }; Returns: Json }
       scan_piece: {
         Args: {
           _code: string
@@ -1194,6 +1312,10 @@ export type Database = {
         Returns: Json
       }
       seal_bag: { Args: { _bag_id: string; _seal: string }; Returns: undefined }
+      set_plastic_bag: {
+        Args: { _bag_id: string; _code: string }
+        Returns: undefined
+      }
       settle_commissions: { Args: { _ids: string[] }; Returns: number }
       staff_directory: {
         Args: never
