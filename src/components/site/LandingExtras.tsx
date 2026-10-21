@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import envelope from "@/assets/parcel-flyer.png";
-import docPack from "@/assets/parcel-small.png";
-import pkg from "@/assets/parcel-large.png";
+import envelope from "@/assets/parcel-flyer.webp";
+import docPack from "@/assets/parcel-small.webp";
+import pkg from "@/assets/parcel-large.webp";
 import doc from "@/assets/parcel-a4.png";
 import hub from "@/assets/sorting-hub.jpg";
 import rider from "@/assets/rider.jpg";
