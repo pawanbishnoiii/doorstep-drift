@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/hooks/use-roles";
 
 export const Route = createFileRoute("/_authenticated/applications")({
-  head: () => ({ meta: [{ title: "Point applications — DropBox Admin" }, { name: "description", content: "Review DropBox Point partner applications." }, { property: "og:title", content: "Point applications — DropBox" }, { property: "og:description", content: "Review DropBox Point partner applications." }] }),
+  head: () => ({ meta: [{ title: "Point applications — Get Xpress Admin" }, { name: "description", content: "Review Get Xpress Point partner applications." }, { property: "og:title", content: "Point applications — Get Xpress" }, { property: "og:description", content: "Review Get Xpress Point partner applications." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Applications,
 });
 

@@ -5,7 +5,7 @@ import { AppShell, PageHeader, Stat } from "@/components/site/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
-  head: () => ({ meta: [{ title: "Analytics — DropBox" }, { name: "description", content: "Shipment analytics for your scope." }, { property: "og:title", content: "Analytics — DropBox" }, { property: "og:description", content: "Shipment analytics for your scope." }] }),
+  head: () => ({ meta: [{ title: "Analytics — Get Xpress" }, { name: "description", content: "Shipment analytics for your scope." }, { property: "og:title", content: "Analytics — Get Xpress" }, { property: "og:description", content: "Shipment analytics for your scope." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Analytics,
 });
 

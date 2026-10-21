@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/hooks/use-roles";
 
 export const Route = createFileRoute("/_authenticated/coupons")({
-  head: () => ({ meta: [{ title: "Offers & coupons — DropBox" }, { name: "description", content: "Create and manage DropBox shipping coupons." }, { property: "og:title", content: "Offers & coupons — DropBox" }, { property: "og:description", content: "Create and manage DropBox shipping coupons." }] }),
+  head: () => ({ meta: [{ title: "Offers & coupons — Get Xpress" }, { name: "description", content: "Create and manage Get Xpress shipping coupons." }, { property: "og:title", content: "Offers & coupons — Get Xpress" }, { property: "og:description", content: "Create and manage Get Xpress shipping coupons." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Coupons,
 });
 

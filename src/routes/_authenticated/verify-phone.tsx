@@ -10,7 +10,7 @@ import { AppShell } from "@/components/site/AppShell";
 import { sendPhoneOtp, verifyPhoneOtp } from "@/lib/otp.functions";
 
 export const Route = createFileRoute("/_authenticated/verify-phone")({
-  head: () => ({ meta: [{ title: "Verify mobile — DropBox" }, { name: "description", content: "Verify your mobile number." }, { property: "og:title", content: "Verify mobile — DropBox" }, { property: "og:description", content: "Verify your mobile number." }] }),
+  head: () => ({ meta: [{ title: "Verify mobile — Get Xpress" }, { name: "description", content: "Verify your mobile number." }, { property: "og:title", content: "Verify mobile — Get Xpress" }, { property: "og:description", content: "Verify your mobile number." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: VerifyPhone,
 });
 

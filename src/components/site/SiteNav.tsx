@@ -8,7 +8,7 @@ export function SiteNav() {
   return (
     <nav className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-5">
       <div className="mx-auto flex max-w-[1240px] items-center justify-between rounded-[22px] border border-card/80 bg-background/80 px-4 py-3 shadow-soft backdrop-blur-2xl md:px-6">
-        <Link to="/" aria-label="DropBox home"><BrandMark /></Link>
+        <Link to="/" aria-label="Get Xpress home"><BrandMark /></Link>
         <div className="hidden items-center gap-7 text-sm font-semibold text-muted-foreground md:flex">
           <Link to="/track" className="hover:text-ink" activeProps={{ className: "text-ink" }}>Track</Link>
           <Link to="/ship" className="hover:text-ink" activeProps={{ className: "text-ink" }}>Ship now</Link>

@@ -15,11 +15,11 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s) => z.object({ redirect: z.string().optional() }).parse(s),
   head: () => ({
     meta: [
-      { title: "Sign in — DropBox" },
-      { name: "description", content: "Sign in to DropBox to book pickups and track your shipments." },
-      { property: "og:title", content: "Sign in to DropBox" },
+      { title: "Sign in — Get Xpress" },
+      { name: "description", content: "Sign in to Get Xpress to book pickups and track your shipments." },
+      { property: "og:title", content: "Sign in to Get Xpress" },
       { property: "og:description", content: "Book pickups and track shipments." },
-    ],
+    , { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }],
   }),
   component: AuthPage,
 });
@@ -68,14 +68,14 @@ function AuthPage() {
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-2">
       <div className="relative hidden overflow-hidden lg:block">
-        <img src={hero} alt="DropBox rider" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={hero} alt="Get Xpress rider" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
         <p className="absolute bottom-12 left-12 max-w-md font-display text-5xl font-extrabold leading-none text-ink-foreground">Every parcel, one tap away.</p>
       </div>
       <div className="flex items-center justify-center bg-hero px-5 py-12">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
           <Link to="/"><BrandMark /></Link>
-          <h1 className="mt-10 font-display text-4xl font-extrabold tracking-tight">Welcome to DropBox</h1>
+          <h1 className="mt-10 font-display text-4xl font-extrabold tracking-tight">Welcome to Get Xpress</h1>
           <p className="mt-2 text-muted-foreground">Sign in to book pickups and track parcels. You'll verify your mobile next.</p>
           <button onClick={google} disabled={busy} className="mt-8 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-ink font-bold text-ink-foreground shadow-soft transition-transform active:scale-[.98]">
             {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : (

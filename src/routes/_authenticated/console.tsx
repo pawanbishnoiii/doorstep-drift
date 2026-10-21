@@ -11,7 +11,7 @@ import { searchPincodes } from "@/lib/pincodes.functions";
 import { ROLE_LABEL } from "@/hooks/use-roles";
 
 export const Route = createFileRoute("/_authenticated/console")({
-  head: () => ({ meta: [{ title: "Staff console — DropBox" }, { name: "description", content: "DropBox staff console: roles, pincode allocations and audit log." }] }),
+  head: () => ({ meta: [{ title: "Staff console — Get Xpress" }, { name: "description", content: "Get Xpress staff console: roles, pincode allocations and audit log." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Console,
 });
 
@@ -64,7 +64,7 @@ function Console() {
       </div>
       <div className="mt-5 flex gap-1.5 overflow-x-auto">
         {([["allocations", MapPin, "Pincodes"], ["team", Users, "Team"], ["staff", Users, "Grant role"], ["import", Upload, "Import"], ["audit", ShieldCheck, "Audit"]] as const).map(([t, Icon, label]) => (
-          <button key={t} onClick={() => setTab(t)} className={`flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm font-bold ${tab === t ? "bg-ink text-ink-foreground" : "border bg-card"}`}><Icon className="h-4 w-4" />{label}</button>
+          <button key={t} onClick={() => setTab(t)} className={`flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-bold ${tab === t ? "bg-ink text-ink-foreground" : "border bg-card"}`}><Icon className="h-4 w-4" />{label}</button>
         ))}
       </div>
 
@@ -77,10 +77,10 @@ function Console() {
           </div>
           <div className="space-y-2">
             {(allocations ?? []).map((a) => (
-              <div key={a.id} className={`flex items-center justify-between rounded-2xl border bg-card p-3.5 ${a.status !== "active" ? "opacity-50" : ""}`}>
+              <div key={a.id} className={`flex items-center justify-between rounded-lg border bg-card p-3.5 ${a.status !== "active" ? "opacity-50" : ""}`}>
                 <div>
                   <p className="font-mono font-bold">{a.pincode} <span className="font-sans text-xs font-semibold text-muted-foreground">{(a.pincodes as { city: string } | null)?.city}, {(a.pincodes as { state: string } | null)?.state}</span></p>
-                  <p className="text-xs text-muted-foreground">{ROLE_LABEL[a.holder_role]} · {a.status}{a.effective_to ? ` · released ${new Date(a.effective_to).toLocaleDateString("en-IN")}` : ""}</p>
+                  <p className="text-xs text-muted-foreground">{ROLE_LABEL[a.holder_role]} · {a.status} · {a.holder_user_id}{a.effective_to ? ` · released ${new Date(a.effective_to).toLocaleDateString("en-IN")}` : ""}</p>
                 </div>
                 {a.status === "active" && (
                   <button onClick={async () => {
@@ -90,7 +90,7 @@ function Console() {
                 )}
               </div>
             ))}
-            {allocations?.length === 0 && <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">No allocations in your scope yet.</p>}
+            {allocations?.length === 0 && <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">No allocations in your scope yet.</p>}
           </div>
           {isAdmin && <p className="text-xs text-muted-foreground">Admins can allocate any pincode to any level. State Managers allocate to Area Managers; Area Managers allocate to Points — only from their own pincodes.</p>}
         </div>
@@ -102,12 +102,12 @@ function Console() {
       {tab === "audit" && (
         <div className="mt-5 space-y-2">
           {(audits ?? []).map((a) => (
-            <div key={a.id} className="rounded-2xl border bg-card p-3.5 text-sm">
+            <div key={a.id} className="rounded-lg border bg-card p-3.5 text-sm">
               <p className="font-bold">{a.action} <span className="font-normal text-muted-foreground">on {a.entity}</span></p>
               <p className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString("en-IN")} · {JSON.stringify(a.meta)}</p>
             </div>
           ))}
-          {audits?.length === 0 && <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">No audit entries yet.</p>}
+          {audits?.length === 0 && <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">No audit entries yet.</p>}
         </div>
       )}
     </AppShell>
@@ -137,7 +137,7 @@ function TeamPanel({ allocations, onDone }: { allocations: { id: string; pincode
       {data.map((u) => {
         const held = allocations.filter((a) => a.holder_user_id === u.user_id && a.status === "active");
         return (
-          <div key={u.user_id} className="rounded-2xl border bg-card p-4">
+          <div key={u.user_id} className="rounded-lg border bg-card p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div><p className="font-bold">{u.full_name ?? "—"} <span className="text-sm font-semibold text-muted-foreground">{u.phone}</span></p>
                 <p className="break-all font-mono text-xs text-muted-foreground">ID: {u.user_id}</p></div>
@@ -161,7 +161,7 @@ function TeamPanel({ allocations, onDone }: { allocations: { id: string; pincode
           </div>
         );
       })}
-      {data.length === 0 && <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">No staff in your scope yet.</p>}
+      {data.length === 0 && <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">No staff in your scope yet.</p>}
     </div>
   );
 }
@@ -176,7 +176,7 @@ function AllocateForm({ roles, onDone }: { roles: string[]; onDone: () => void }
   const levels = roles.includes("admin") ? ["state_manager", "area_manager", "point"] : roles.includes("state_manager") ? ["area_manager"] : ["point"];
 
   return (
-    <div className="rounded-3xl border bg-card p-4">
+    <div className="rounded-lg border bg-card p-4">
       <p className="font-bold">Allocate a pincode</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <div className="relative">
@@ -186,9 +186,9 @@ function AllocateForm({ roles, onDone }: { roles: string[]; onDone: () => void }
               if (v.length >= 2) setSuggest(await search({ data: { q: v } }) as { pincode: string; city: string; state: string }[]);
               else setSuggest([]);
             }}
-            className="h-12 w-full rounded-2xl border bg-background px-4 font-mono font-bold outline-none" />
+            className="h-12 w-full rounded-lg border bg-background px-4 font-mono font-bold outline-none" />
           {suggest.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-2xl border bg-card shadow-soft">
+            <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border bg-card shadow-soft">
               {suggest.map((s) => (
                 <button key={s.pincode} onClick={() => { setPin(s.pincode); setSuggest([]); }} className="block w-full px-4 py-2 text-left text-sm hover:bg-muted">
                   <span className="font-mono font-bold">{s.pincode}</span> <span className="text-muted-foreground">{s.city}, {s.state}</span>
@@ -197,8 +197,8 @@ function AllocateForm({ roles, onDone }: { roles: string[]; onDone: () => void }
             </div>
           )}
         </div>
-        <input value={holder} onChange={(e) => setHolder(e.target.value.trim())} placeholder="Holder mobile or user ID" className="h-12 rounded-2xl border bg-background px-4 text-sm font-semibold outline-none" />
-        <select value={level} onChange={(e) => setLevel(e.target.value)} className="h-12 rounded-2xl border bg-background px-4 text-sm font-bold outline-none">
+        <input value={holder} onChange={(e) => setHolder(e.target.value.trim())} placeholder="Holder mobile or user ID" className="h-12 rounded-lg border bg-background px-4 text-sm font-semibold outline-none" />
+        <select value={level} onChange={(e) => setLevel(e.target.value)} className="h-12 rounded-lg border bg-background px-4 text-sm font-bold outline-none">
           {levels.map((l) => <option key={l} value={l}>{ROLE_LABEL[l]}</option>)}
         </select>
       </div>
@@ -209,7 +209,7 @@ function AllocateForm({ roles, onDone }: { roles: string[]; onDone: () => void }
         const { error } = await supabase.rpc("allocate_pincode", { _pincode: pin, _holder: holderId, _holder_role: level as "state_manager" | "area_manager" | "point" });
         setBusy(false);
         if (error) toast.error(error.message); else { toast.success(`Pincode ${pin} allocated`); setPin(""); setHolder(""); onDone(); }
-      }} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-bold text-primary-foreground disabled:opacity-40">
+      }} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary font-bold text-primary-foreground disabled:opacity-40">
         {busy && <Loader2 className="h-4 w-4 animate-spin" />} Allocate
       </button>
       <p className="mt-2 text-xs text-muted-foreground">Enter the holder's verified mobile number or their user ID (shown in the Team tab). Conflicts and out-of-scope pins are rejected automatically.</p>
@@ -228,15 +228,15 @@ function StaffForm({ roles }: { roles: string[] }) {
   const grantable = roles.includes("admin") ? ["admin", "state_director", "state_manager", "area_manager", "network", "point"]
     : roles.includes("state_director") ? ["state_manager"] : roles.includes("state_manager") ? ["area_manager"] : roles.includes("area_manager") ? ["point"] : [];
   return (
-    <div className="mt-5 rounded-3xl border bg-card p-4">
+    <div className="mt-5 rounded-lg border bg-card p-4">
       <p className="font-bold">Grant a staff role</p>
       <p className="mt-1 break-all text-xs text-muted-foreground">Your user ID (share it with your manager for pincode allocation): <span className="font-mono font-bold text-ink">{myId}</span></p>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="staff email or mobile" className="h-12 rounded-2xl border bg-background px-4 text-sm font-semibold outline-none" />
-        <select value={role} onChange={(e) => setRole(e.target.value)} className="h-12 rounded-2xl border bg-background px-4 text-sm font-bold outline-none">
+        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="staff email or mobile" className="h-12 rounded-lg border bg-background px-4 text-sm font-semibold outline-none" />
+        <select value={role} onChange={(e) => setRole(e.target.value)} className="h-12 rounded-lg border bg-background px-4 text-sm font-bold outline-none">
           {grantable.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
         </select>
-        <input value={state} onChange={(e) => setState(e.target.value)} placeholder="State (for state roles)" className="h-12 rounded-2xl border bg-background px-4 text-sm font-semibold outline-none" />
+        <input value={state} onChange={(e) => setState(e.target.value)} placeholder="State (for state roles)" className="h-12 rounded-lg border bg-background px-4 text-sm font-semibold outline-none" />
       </div>
       <button disabled={busy || !email || grantable.length === 0} onClick={async () => {
         setBusy(true);
@@ -250,7 +250,7 @@ function StaffForm({ roles }: { roles: string[] }) {
           toast.success(`Role granted to ${email}`); setEmail("");
         } catch (e) { toast.error((e as Error).message); }
         setBusy(false);
-      }} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-ink font-bold text-ink-foreground disabled:opacity-40">
+      }} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink font-bold text-ink-foreground disabled:opacity-40">
         {busy && <Loader2 className="h-4 w-4 animate-spin" />} Grant role
       </button>
       {grantable.length === 0 && <p className="mt-2 text-xs text-muted-foreground">Your role cannot grant further roles.</p>}
@@ -260,12 +260,12 @@ function StaffForm({ roles }: { roles: string[] }) {
 
 function ImportPanel({ isAdmin }: { isAdmin: boolean }) {
   const [busy, setBusy] = useState(false);
-  if (!isAdmin) return <p className="mt-5 rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">Pincode CSV import is Admin-only.</p>;
+  if (!isAdmin) return <p className="mt-5 rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Pincode CSV import is Admin-only.</p>;
   return (
-    <div className="mt-5 rounded-3xl border bg-card p-4">
+    <div className="mt-5 rounded-lg border bg-card p-4">
       <p className="font-bold">Import pincode CSV</p>
       <p className="mt-1 text-xs text-muted-foreground">Columns: Pincode, City, State, Tier, Zone. Existing pincodes are updated; every import is logged in the audit trail.</p>
-      <label className="mt-3 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary font-bold text-primary-foreground">
+      <label className="mt-3 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary font-bold text-primary-foreground">
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Choose CSV
         <input type="file" accept=".csv" className="hidden" onChange={async (e) => {
           const file = e.target.files?.[0]; if (!file) return;
@@ -273,7 +273,7 @@ function ImportPanel({ isAdmin }: { isAdmin: boolean }) {
           try {
             const text = await file.text();
             const lines = text.split(/\r?\n/).filter(Boolean);
-            const header = lines[0]!.toLowerCase();
+            const header = (lines[0] ?? "").toLowerCase();
             if (!header.includes("pincode") || !header.includes("city")) throw new Error("CSV must have Pincode, City, State columns.");
             const rows = lines.slice(1).map((l) => {
               const [pincode = "", city = "", state = "", tier = "", zone = ""] = l.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));

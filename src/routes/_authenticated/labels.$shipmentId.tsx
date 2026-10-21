@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { buildLabelsPdf, downloadBlob, type LabelPiece, type LabelShipment } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/labels/$shipmentId")({
-  head: () => ({ meta: [{ title: "Shipping labels — DropBox" }, { name: "description", content: "Print or download DropBox shipping labels." }] }),
+  head: () => ({ meta: [{ title: "Shipping labels — Get Xpress" }, { name: "description", content: "Print or download Get Xpress shipping labels." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Labels,
 });
 
