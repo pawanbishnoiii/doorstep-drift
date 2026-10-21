@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- Keep this remix's migration history independent of the source project; use the migration tool for future changes so copied migrations are not replayed.
 - Pricing lives only in `src/lib/pricing.ts` and is recomputed server-side in `createShipment`; never trust client prices.
 - Phone OTP codes are hashed in `phone_otps` (service-role only); `OTP_DEV_DISPLAY` in `src/lib/otp.functions.ts` returns the code to the UI until an SMS provider is wired.
 - Public tracking goes through the `track_shipment` SQL function, which exposes only non-personal fields.
