@@ -120,7 +120,7 @@ function PointPartner() {
 
       <section className="timeline-shell px-4 pb-24 md:px-8">
         <div className="mx-auto grid max-w-[1240px] items-center gap-12 lg:grid-cols-2">
-          <img src={hubTeam} alt="Get Xpress Point team" loading="lazy" className="reveal rounded-[36px] object-cover shadow-soft" />
+          <img src={hubTeam} alt="Get Xpress Hub team" loading="lazy" className="reveal rounded-[36px] object-cover shadow-soft" />
           <div>
             <h2 className="reveal font-display text-4xl font-extrabold md:text-5xl">Live in 4 simple steps</h2>
             <div className="mt-8 space-y-3">
@@ -182,7 +182,7 @@ function ApplySection() {
       <div className="mx-auto grid max-w-[1100px] gap-10 lg:grid-cols-[.8fr_1.2fr]">
         <div>
           <ParcelLottie className="h-32 w-32" />
-          <h2 className="font-display text-4xl font-extrabold md:text-5xl">Apply to become a Point</h2>
+          <h2 className="font-display text-4xl font-extrabold md:text-5xl">Apply to become a Hub</h2>
           <p className="mt-3 text-muted-foreground">Takes 3 minutes. Our partner team reviews every application personally.</p>
           {apps.length > 0 && (
             <div className="mt-8 space-y-2">
