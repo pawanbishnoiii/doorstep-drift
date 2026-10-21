@@ -99,7 +99,8 @@ function RootComponent() {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token; if (!token) return;
       try {
-        const header = JSON.parse(atob(token.split(".")[0]!.replace(/-/g, "+").replace(/_/g, "/")));
+        const encoded = token.split(".")[0]; if (!encoded) return;
+        const header = JSON.parse(atob(encoded.replace(/-/g, "+").replace(/_/g, "/")));
         const jwks = await (await fetch(`${import.meta.env["VITE_SUPABASE_URL"]}/auth/v1/.well-known/jwks.json`)).json();
         const known = (jwks.keys ?? []).some((k: { kid?: string }) => k.kid === header.kid);
         if (header.alg !== "HS256" && !known) {

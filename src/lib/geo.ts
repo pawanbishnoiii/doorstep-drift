@@ -12,9 +12,16 @@ const toHit = (r: { lat: string; lon: string; display_name: string; address?: No
 });
 
 export async function searchPlaces(q: string): Promise<GeoHit[]> {
-  const res = await fetch(`${BASE}/search?format=jsonv2&addressdetails=1&countrycodes=in&limit=6&q=${encodeURIComponent(q)}`, { headers: { "Accept-Language": "en" } });
+  // Photon supports search-as-you-type; public Nominatim forbids autocomplete.
+  const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q.slice(0,120))}&limit=6&bbox=68,6,98,36`, { signal: AbortSignal.timeout(3500) });
   if (!res.ok) return [];
-  return ((await res.json()) as Parameters<typeof toHit>[0][]).map(toHit);
+  const json = await res.json() as {features?: {geometry:{coordinates:number[]};properties:Record<string,string>}[]};
+  return (json.features ?? []).flatMap(f => {
+    const [lng,lat] = f.geometry.coordinates;
+    if (lat === undefined || lng === undefined || f.properties['countrycode']?.toUpperCase() !== 'IN') return [];
+    const p = f.properties;
+    return [{lat,lng,label:[p['name'],p['street'],p['city'],p['state'],p['postcode']].filter(Boolean).join(', '),pincode:p['postcode'],city:p['city'] ?? p['district'] ?? p['county'],state:p['state']}];
+  });
 }
 
 export async function reverseGeocode(lat: number, lng: number): Promise<GeoHit | null> {

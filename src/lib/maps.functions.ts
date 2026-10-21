@@ -36,13 +36,13 @@ export const googlePlaceSearch = createServerFn({ method: "POST" }).middleware([
       fieldMask: "places.id,places.formattedAddress,places.location,places.addressComponents",
     });
     const hits: GeoHit[] = [];
-    for (const p of (j.places ?? []) as { location?: { latitude: number; longitude: number }; formattedAddress?: string; addressComponents?: Comp[] }[]) {
-      if (!p.location) continue;
+    await Promise.all(((j.places ?? []) as { location?: { latitude: number; longitude: number }; formattedAddress?: string; addressComponents?: Comp[] }[]).slice(0, 6).map(async (p) => {
+      if (!p.location) return;
       let pincode = pick(p.addressComponents, "postal_code");
       // Some place results omit the postal code — fill it via reverse geocode.
       if (!pincode) { const r = await reverse(p.location.latitude, p.location.longitude).catch(() => null); pincode = r?.pincode; }
       hits.push({ lat: p.location.latitude, lng: p.location.longitude, label: p.formattedAddress ?? data.q, pincode, city: pick(p.addressComponents, "locality", "administrative_area_level_3", "administrative_area_level_2"), state: pick(p.addressComponents, "administrative_area_level_1") } as GeoHit);
-    }
+    }));
     return hits;
   });
 

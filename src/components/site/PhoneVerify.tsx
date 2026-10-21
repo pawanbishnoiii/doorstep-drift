@@ -6,13 +6,14 @@ import { toast } from "sonner";
 import { Loader2, ShieldCheck, Smartphone } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { sendPhoneOtp, verifyPhoneOtp } from "@/lib/otp.functions";
+import { Button } from "@/components/ui/button";
 
 /** Step 1 of onboarding: verify the mobile number with a one-time code. */
-export function PhoneVerify({ onDone }: { onDone: () => void }) {
+export function PhoneVerify({ onDone, initialPhone = "" }: { onDone: () => void; initialPhone?: string }) {
   const send = useServerFn(sendPhoneOtp);
   const verify = useServerFn(verifyPhoneOtp);
   const qc = useQueryClient();
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(initialPhone.replace(/^\+91/, ""));
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [code, setCode] = useState("");
   const [devCode, setDevCode] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export function PhoneVerify({ onDone }: { onDone: () => void }) {
   };
 
   return (
-      <div className="mx-auto max-w-md rounded-[32px] bg-card p-7 shadow-soft">
+      <div className="max-w-md py-4">
         <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary"><Smartphone className="h-7 w-7" /></span>
         <h1 className="mt-5 font-display text-3xl font-extrabold">Verify your mobile</h1>
         <p className="mt-1 text-muted-foreground">We use it for pickup updates and OTP delivery.</p>
@@ -51,7 +52,7 @@ export function PhoneVerify({ onDone }: { onDone: () => void }) {
                 <span className="mr-2 font-bold text-muted-foreground">+91</span>
                 <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={10} placeholder="98765 43210" className="flex-1 bg-transparent text-lg font-bold outline-none" />
               </div>
-              <button onClick={request} disabled={busy} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-bold text-primary-foreground">{busy && <Loader2 className="h-5 w-5 animate-spin" />} Send OTP</button>
+               <Button type="button" onClick={request} disabled={busy} className="h-12 w-full">{busy && <Loader2 className="h-5 w-5 animate-spin" />} Send OTP</Button>
             </motion.div>
           ) : (
             <motion.div key="c" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} className="mt-6 space-y-4">
@@ -65,8 +66,8 @@ export function PhoneVerify({ onDone }: { onDone: () => void }) {
               <InputOTP autoFocus maxLength={6} value={code} onChange={setCode}>
                 <InputOTPGroup className="w-full justify-between">{[0, 1, 2, 3, 4, 5].map((i) => <InputOTPSlot key={i} index={i} className="h-14 w-12 rounded-xl border text-xl font-bold" />)}</InputOTPGroup>
               </InputOTP>
-              <button onClick={confirm} disabled={busy || code.length !== 6} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-ink font-bold text-ink-foreground disabled:opacity-50">{busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />} Verify</button>
-              <button onClick={() => { setStep("phone"); setCode(""); }} className="w-full text-sm font-semibold text-muted-foreground">Change number</button>
+               <Button type="button" onClick={confirm} disabled={busy || code.length !== 6} className="h-12 w-full">{busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />} Verify</Button>
+               <Button type="button" variant="ghost" onClick={() => { setStep("phone"); setCode(""); }} className="w-full">Change number</Button>
             </motion.div>
           )}
         </AnimatePresence>

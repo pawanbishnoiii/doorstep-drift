@@ -25,4 +25,8 @@
 - Public base URL for QR/tracking links: `publicBaseUrl()` in `src/lib/brand.ts` (env `VITE_PUBLIC_BASE_URL`).
 - Menu visibility per role lives in `src/lib/access.ts` (`navVisible`) and is covered by `src/test/role-access.test.tsx`; data access is still enforced by RLS.
 - Customer tracking Q&A goes through `/api/public/track-assistant`, which only feeds `track_shipment` output to the model, so no personal data reaches AI.
-- Signed-in server functions use requireUser from src/lib/auth-guard.ts (getUser verification) instead of the generated JWKS middleware, because local key verification failed after remixing.
+- Signed-in server functions use requireUser from src/lib/auth-guard.ts with explicit remote auth user verification instead of local JWKS verification, because remix signing keys may differ.
+- Contact onboarding uses a shared validated schema and server functions; contact changes invalidate phone verification unless the verified number is unchanged.
+- Location autocomplete combines authenticated Google with keyless Photon, using bounded TTL caches and stale-response guards; never use public Nominatim for autocomplete.
+- Demo workflow data stays isolated from live records and uses DEMO-prefixed identifiers; never seed privileged users or real shipment identifiers from demo UI.
+- Provider readiness distinguishes credential presence from a verified working integration; do not treat a settings toggle as successful connectivity.

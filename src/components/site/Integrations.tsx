@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { ProviderReadiness } from "./ProviderReadiness";
 
 const SMTP: Record<string, { host: string; port: number }> = { gmail: { host: "smtp.gmail.com", port: 587 }, hostinger: { host: "smtp.hostinger.com", port: 465 }, custom: { host: "", port: 587 } };
 const field = "mt-1 h-11 w-full rounded-md border bg-background px-3";
@@ -10,7 +11,6 @@ const field = "mt-1 h-11 w-full rounded-md border bg-background px-3";
 export function Integrations() {
   const qc = useQueryClient();
   const { data: s } = useQuery({ queryKey: ["integrations"], queryFn: async () => (await supabase.from("integration_settings").select("*").eq("id", true).maybeSingle()).data });
-  if (!s) return null;
   const save = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -29,12 +29,12 @@ export function Integrations() {
   };
   const L = ({ label, children }: { label: string; children: React.ReactNode }) => <label className="block text-sm">{label}{children}</label>;
   return (
-    <form key={s.updated_at} onSubmit={save} className="mt-8 space-y-6 border-t pt-6">
+    <><ProviderReadiness />{s && <form key={s.updated_at} onSubmit={save} className="mt-8 space-y-6 border-t pt-6">
       <h2 className="text-2xl font-bold">Integrations</h2>
       <section className="grid gap-4 rounded-lg border bg-card p-5 md:grid-cols-2">
         <h3 className="font-bold md:col-span-2">Email alerts (Gmail / Hostinger)</h3>
         <L label="Admin alert email"><input name="admin_alert_email" type="email" defaultValue={s.admin_alert_email ?? ""} placeholder="ops@getxpress.in" className={field} /></L>
-        <L label="Provider"><select name="smtp_provider" defaultValue={s.smtp_provider} className={field} onChange={(e) => { const p = SMTP[e.target.value] ?? { host: "", port: 587 }; const form = e.target.form!; (form.elements.namedItem("smtp_host") as HTMLInputElement).value = p.host; (form.elements.namedItem("smtp_port") as HTMLInputElement).value = String(p.port); }}><option value="gmail">Gmail</option><option value="hostinger">Hostinger</option><option value="custom">Other</option></select></L>
+        <L label="Provider"><select name="smtp_provider" defaultValue={s.smtp_provider} className={field} onChange={(e) => { const p = SMTP[e.target.value] ?? { host: "", port: 587 }; const form = e.target.form; if (!form) return; (form.elements.namedItem("smtp_host") as HTMLInputElement).value = p.host; (form.elements.namedItem("smtp_port") as HTMLInputElement).value = String(p.port); }}><option value="gmail">Gmail</option><option value="hostinger">Hostinger</option><option value="custom">Other</option></select></L>
         <L label="SMTP host"><input name="smtp_host" defaultValue={s.smtp_host ?? SMTP[s.smtp_provider]?.host} className={field} /></L>
         <L label="Port"><input name="smtp_port" type="number" defaultValue={s.smtp_port ?? SMTP[s.smtp_provider]?.port} className={field} /></L>
         <L label="Login email"><input name="smtp_user" defaultValue={s.smtp_user ?? ""} className={field} /></L>
@@ -60,6 +60,6 @@ export function Integrations() {
         <label className="flex items-center gap-2 text-sm"><input name="api_enabled" type="checkbox" defaultChecked={s.api_enabled} /> Allow seller API access</label>
       </section>
       <Button type="submit" className="h-12">Save integrations</Button>
-    </form>
+    </form>}</>
   );
 }

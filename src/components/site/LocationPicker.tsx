@@ -6,6 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { googlePlaceSearch, googleReverse } from "@/lib/maps.functions";
 import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
+import { searchLocations } from "@/lib/location-search";
 
 const LeafletMap = lazy(() => import("./LeafletMap"));
 const GoogleMap = lazy(() => import("./GoogleMap"));
@@ -29,9 +30,9 @@ export function LocationPicker({ point, onResolve }: { point: { lat: number; lng
   const search = (v: string) => {
     setQ(v);
     clearTimeout(t.current);
-    if (v.trim().length < 3) return setHits([]);
     const id = ++sequence.current;
-    t.current = setTimeout(async () => { setBusy(true); try { const rows = user ? await googleSearch({ data: { q: v } }).catch(() => searchPlaces(v)) : await searchPlaces(v); if(id === sequence.current) setHits(rows); } catch { if(id === sequence.current) setHits([]); } if(id === sequence.current) setBusy(false); }, 350);
+    if (v.trim().length < 3) { setHits([]); setBusy(false); return; }
+    t.current = setTimeout(async () => { setBusy(true); try { const rows = await searchLocations(v, rows => { if(id === sequence.current) setHits(rows); }); if(id === sequence.current) setHits(rows); } catch { if(id === sequence.current) setHits([]); } if(id === sequence.current) setBusy(false); }, 300);
   };
   const pick = async (lat: number, lng: number) => { setBusy(true); const h = await (user ? googlePick({ data: { lat, lng } }).catch(() => reverseGeocode(lat,lng)) : reverseGeocode(lat, lng)).catch(() => null); setBusy(false); onResolve(h ?? { lat, lng, label: `${lat.toFixed(5)}, ${lng.toFixed(5)}` }); };
   const locate = () => {

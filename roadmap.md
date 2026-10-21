@@ -1,4 +1,12 @@
 # Get Xpress upgrade
+## Current request — landing, onboarding and exploration
+- [ ] Upgrade landing typography, motion, imagery and footer; add policy pages.
+- [ ] Debounced parallel Google/free location searches with bounded caching and stale-result protection.
+- [ ] Two-step personal details and contact verification onboarding; investigate current key error.
+- [ ] Isolated realistic demo customers, hubs, shipments and hub processing exploration.
+- [ ] Provider documentation and truthful configuration readiness; hub-independent delivery.
+- [ ] Improve admin table exploration and export; verify central flows and role checks.
+
 - [ ] Google Maps renderer and authenticated suggestions; keyless fallback.
 - [ ] Get Xpress name, logos, favicon, domain references and upgraded landing page.
 - [ ] Public booking, persistent guest drafts, login/OTP continuation at confirmation.

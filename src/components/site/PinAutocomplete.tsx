@@ -16,16 +16,16 @@ export function PinAutocomplete({ label, value, city, onChange, onPick, compact 
   useEffect(() => { setText(value); }, [value]);
 
   useEffect(() => {
-    if (!open) return;
+    const my = ++seq.current;
+    if (!open) { setBusy(false); return; }
     const q = text.trim();
     if (q.length < 2) { setHits([]); return; }
-    const my = ++seq.current;
     const t = setTimeout(async () => {
       setBusy(true);
       const r = await lookupPins(q).catch(() => []);
       if (my === seq.current) { setHits(r); setActive(0); setBusy(false); }
     }, /^\d+$/.test(q) ? 90 : 220);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); seq.current++; };
   }, [text, open]);
 
   const pick = (h: PinHit) => { setText(h.pincode); onChange(h.pincode); onPick(h); setOpen(false); };
@@ -48,7 +48,7 @@ export function PinAutocomplete({ label, value, city, onChange, onPick, compact 
         {city && !compact && <span className="block truncate text-xs text-muted-foreground">{city}</span>}
       </label>
       {open && hits.length > 0 && (
-        <div className="absolute z-50 mt-1 max-h-72 w-full min-w-[260px] overflow-auto rounded-2xl border bg-popover p-1 text-popover-foreground shadow-soft">
+        <div className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-soft">
           {hits.map((h, i) => (
             <button key={`${h.source}-${h.pincode}-${i}`} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pick(h)}
               className={`flex w-full items-start gap-2 rounded-xl px-3 py-2 text-left text-sm ${i === active ? "bg-muted" : ""}`}>

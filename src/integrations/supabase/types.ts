@@ -244,6 +244,30 @@ export type Database = {
         }
         Relationships: []
       }
+      courier_provider_settings: {
+        Row: {
+          account_label: string | null
+          enabled: boolean
+          environment: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          account_label?: string | null
+          enabled?: boolean
+          environment?: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          account_label?: string | null
+          enabled?: boolean
+          environment?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       health_checks: {
         Row: {
           checked_at: string
@@ -764,10 +788,13 @@ export type Database = {
           avatar_url: string | null
           business_name: string | null
           city: string | null
+          contact_email: string | null
           created_at: string
+          first_name: string | null
           full_name: string | null
           gender: string | null
           id: string
+          last_name: string | null
           last_seen_at: string | null
           lat: number | null
           lng: number | null
@@ -776,6 +803,7 @@ export type Database = {
           phone_verified: boolean
           pincode: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           account_type?: string
@@ -784,10 +812,13 @@ export type Database = {
           avatar_url?: string | null
           business_name?: string | null
           city?: string | null
+          contact_email?: string | null
           created_at?: string
+          first_name?: string | null
           full_name?: string | null
           gender?: string | null
           id: string
+          last_name?: string | null
           last_seen_at?: string | null
           lat?: number | null
           lng?: number | null
@@ -796,6 +827,7 @@ export type Database = {
           phone_verified?: boolean
           pincode?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           account_type?: string
@@ -804,10 +836,13 @@ export type Database = {
           avatar_url?: string | null
           business_name?: string | null
           city?: string | null
+          contact_email?: string | null
           created_at?: string
+          first_name?: string | null
           full_name?: string | null
           gender?: string | null
           id?: string
+          last_name?: string | null
           last_seen_at?: string | null
           lat?: number | null
           lng?: number | null
@@ -816,6 +851,7 @@ export type Database = {
           phone_verified?: boolean
           pincode?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }

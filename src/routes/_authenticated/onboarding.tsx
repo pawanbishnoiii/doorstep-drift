@@ -1,89 +1,25 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { LocateFixed, Loader2 } from "lucide-react";
-import { AppShell, PageHeader } from "@/components/site/AppShell";
-import { PhoneVerify } from "@/components/site/PhoneVerify";
-import { PinAutocomplete } from "@/components/site/PinAutocomplete";
-import { Button } from "@/components/ui/button";
-import { useProfile } from "@/hooks/use-profile";
-import { supabase } from "@/integrations/supabase/client";
-import { validateOnboarding } from "@/lib/onboarding";
-
-export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({ meta: [{ title: "Complete your profile — Get Xpress" }, { name: "description", content: "Add your name, gender, age and pickup address." }, { property: "og:title", content: "Complete your Get Xpress profile" }, { property: "og:description", content: "Profile setup for Get Xpress." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
-  component: Onboarding,
-});
-
-function Onboarding() {
-  const { data } = useProfile();
-  const qc = useQueryClient();
-  const navigate = useNavigate();
-  const p = data?.profile;
-  const [f, setF] = useState({ full_name: "", gender: "", age: "", address: "", pincode: "", city: "" });
-  const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [locating, setLocating] = useState(false);
-  useEffect(() => {
-    if (p) setF({ full_name: p.full_name ?? "", gender: p.gender ?? "", age: p.age ? String(p.age) : "", address: p.address ?? "", pincode: p.pincode ?? "", city: p.city ?? "" });
-  }, [p]);
-  const set = (k: keyof typeof f) => (v: string) => setF((x) => ({ ...x, [k]: v }));
-
-  const locate = () => {
-    if (!navigator.geolocation) { toast.error("Location not supported on this device."); return; }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const g = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      setGeo(g);
-      try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${g.lat}&lon=${g.lng}`);
-        const j = await r.json();
-        const a = j.address ?? {};
-        setF((x) => ({ ...x, address: j.display_name ?? x.address, pincode: a.postcode?.replace(/\D/g, "").slice(0, 6) || x.pincode, city: a.city || a.town || a.village || a.state_district || x.city }));
-      } catch { /* keep coordinates only */ }
-      setLocating(false);
-    }, () => { setLocating(false); toast.error("Allow location access, or type your address."); }, { enableHighAccuracy: true, timeout: 10000 });
-  };
-
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const err = validateOnboarding({ ...f, age: Number(f.age) });
-    if (err) { toast.error(err); return; }
-    setBusy(true);
-    const { error } = await supabase.from("profiles").update({
-      full_name: f.full_name.trim(), gender: f.gender, age: Number(f.age), address: f.address.trim(), pincode: f.pincode, city: f.city || null,
-      lat: geo?.lat ?? null, lng: geo?.lng ?? null, onboarded_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-    }).eq("id", data!.user.id);
-    setBusy(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Profile saved");
-    await qc.invalidateQueries({ queryKey: ["profile"] });
-    navigate({ to: "/dashboard" });
-  };
-
-  const input = "mt-1 h-12 w-full rounded-xl border bg-card px-4";
-  return (
-    <AppShell skipOnboarding requirePhone={false}>
-      {data && !p?.phone_verified ? <PhoneVerify onDone={() => qc.invalidateQueries({ queryKey: ["profile"] })} /> : <>
-      <PageHeader title="Complete your profile" sub={`Signed in as +91 ${p?.phone ?? ""}`} />
-      <form onSubmit={save} className="grid max-w-2xl gap-4">
-        <label className="text-sm font-semibold">Full name<input required value={f.full_name} onChange={(e) => set("full_name")(e.target.value)} className={input} /></label>
-        <div className="grid grid-cols-2 gap-4">
-          <label className="text-sm font-semibold">Gender
-            <select required value={f.gender} onChange={(e) => set("gender")(e.target.value)} className={input}>
-              <option value="">Select</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option>
-            </select>
-          </label>
-          <label className="text-sm font-semibold">Age<input required type="number" min={13} max={100} value={f.age} onChange={(e) => set("age")(e.target.value)} className={input} /></label>
-        </div>
-        <Button type="button" variant="outline" className="h-12" onClick={locate} disabled={locating}>{locating ? <Loader2 className="animate-spin" /> : <LocateFixed />} Use my current location</Button>
-        {geo && <p className="text-xs text-muted-foreground">Location saved: {geo.lat.toFixed(5)}, {geo.lng.toFixed(5)}</p>}
-        <PinAutocomplete label="Pincode" value={f.pincode} city={f.city} onChange={set("pincode")} onPick={(x) => setF((s) => ({ ...s, pincode: x.pincode, city: x.city ?? s.city }))} />
-        <label className="text-sm font-semibold">Address<textarea required rows={3} value={f.address} onChange={(e) => set("address")(e.target.value)} className="mt-1 w-full rounded-xl border bg-card p-4" /></label>
-        <Button type="submit" className="h-12" disabled={busy}>{busy && <Loader2 className="animate-spin" />} Save and continue</Button>
-      </form>
-      </>}
-    </AppShell>
-  );
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { useServerFn } from '@tanstack/react-start';
+import { useEffect,useState } from 'react';
+import { toast } from 'sonner';
+import { ArrowLeft,ArrowRight,Check,Loader2,ShieldCheck } from 'lucide-react';
+import { AppShell,PageHeader } from '@/components/site/AppShell';
+import { PhoneVerify } from '@/components/site/PhoneVerify';
+import { Button } from '@/components/ui/button';
+import { useProfile } from '@/hooks/use-profile';
+import { contactSchema } from '@/lib/contact-schema';
+import { saveContactDetails,finishOnboarding } from '@/lib/onboarding.functions';
+export const Route=createFileRoute('/_authenticated/onboarding')({head:()=>({meta:[{title:'Your details & contact verification — Get Xpress'},{name:'description',content:'Set up your Get Xpress customer profile and pickup address in two steps.'},{property:'og:title',content:'Your Get Xpress profile'},{property:'og:description',content:'Personal details, contact verification and pickup address.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'}]}),component:Onboarding});
+function Onboarding(){
+ const {data}=useProfile();const p=data?.profile;const qc=useQueryClient();const navigate=useNavigate();
+ const saveDetails=useServerFn(saveContactDetails);const finish=useServerFn(finishOnboarding);
+ const [step,setStep]=useState(1);const [busy,setBusy]=useState(false);const [number,setNumber]=useState('');
+ const [f,setF]=useState({first_name:'',last_name:'',age:'',gender:'',contact_email:'',phone:'',whatsapp:'',address:'',pincode:'',city:''});
+ useEffect(()=>{if(p)setF({first_name:p.first_name??p.full_name?.split(' ')[0]??'',last_name:p.last_name??p.full_name?.split(' ').slice(1).join(' ')??'',age:String(p.age??''),gender:p.gender??'',contact_email:p.contact_email??data?.user.email??'',phone:p.phone?.replace(/^\+91/,'')??'',whatsapp:p.whatsapp?.replace(/^\+91/,'')??'',address:p.address??'',pincode:p.pincode??'',city:p.city??''})},[p,data?.user.email]);
+ const set=(k:keyof typeof f)=>(v:string)=>setF(x=>({...x,[k]:v}));
+ const next=async(e:React.FormEvent)=>{e.preventDefault();const result=contactSchema.safeParse(f);if(!result.success){toast.error(result.error.issues[0]?.message??'Check your details');return;}setBusy(true);try{const r=await saveDetails({data:result.data});setNumber(r.number);await qc.invalidateQueries({queryKey:['profile']});setStep(2);}catch(e){toast.error((e as Error).message)}finally{setBusy(false)}};
+ const complete=async(e:React.FormEvent)=>{e.preventDefault();setBusy(true);try{await finish({data:{address:f.address,pincode:f.pincode,city:f.city}});await qc.invalidateQueries({queryKey:['profile']});toast.success('Your profile is ready');navigate({to:'/dashboard'});}catch(e){toast.error((e as Error).message)}finally{setBusy(false)}};
+ const input='mt-1 h-12 w-full min-w-0 rounded-md border bg-card px-3';
+ return <AppShell skipOnboarding requirePhone={false}><PageHeader title='Welcome to Get Xpress' sub='Your profile'/><div className='max-w-2xl'><div className='mb-8 flex items-center gap-4 border-b pb-5'>{['Personal details','Verify & pickup address'].map((s,i)=><div key={s} className={`flex items-center gap-2 text-sm font-semibold ${step===i+1?'text-primary':'text-muted-foreground'}`}><span className='grid h-8 w-8 shrink-0 place-items-center rounded-full border'>{step>i+1?<Check className='h-4 w-4'/>:i+1}</span>{s}</div>)}</div>{step===1?<form onSubmit={next} className='grid gap-4 sm:grid-cols-2'><label className='text-sm font-semibold'>First name<input aria-label='First name' maxLength={60} autoComplete='given-name' value={f.first_name} onChange={e=>set('first_name')(e.target.value)} required className={input}/></label><label className='text-sm font-semibold'>Last name<input aria-label='Last name' maxLength={60} autoComplete='family-name' value={f.last_name} onChange={e=>set('last_name')(e.target.value)} required className={input}/></label><label className='text-sm font-semibold'>Age<input aria-label='Age' type='number' min={13} max={100} required value={f.age} onChange={e=>set('age')(e.target.value)} className={input}/></label><label className='text-sm font-semibold'>Gender<select aria-label='Gender' required value={f.gender} onChange={e=>set('gender')(e.target.value)} className={input}><option value=''>Select</option><option value='female'>Female</option><option value='male'>Male</option><option value='other'>Other</option></select></label><label className='text-sm font-semibold sm:col-span-2'>Email<input aria-label='Email' type='email' autoComplete='email' maxLength={255} required value={f.contact_email} onChange={e=>set('contact_email')(e.target.value)} className={input}/></label>{(['phone','whatsapp'] as const).map(k=><label key={k} className='text-sm font-semibold'>{k==='phone'?'Phone number':'WhatsApp number'}<div className='relative'><span className='absolute left-3 top-5 text-muted-foreground'>+91</span><input aria-label={k==='phone'?'Phone number':'WhatsApp number'} inputMode='numeric' maxLength={10} value={f[k]} onChange={e=>set(k)(e.target.value.replace(/\D/g,''))} className={`${input} pl-12`}/></div></label>)}<p className='text-xs text-muted-foreground sm:col-span-2'>Phone or WhatsApp — at least one is required.</p><Button disabled={busy} type='submit' className='mt-2 h-12 sm:col-span-2'>{busy?<Loader2 className='animate-spin'/>:<ArrowRight/>}Continue</Button></form>:<div><Button variant='ghost' onClick={()=>setStep(1)}><ArrowLeft/>Personal details</Button>{!p?.phone_verified?<PhoneVerify key={number} initialPhone={number} onDone={()=>qc.invalidateQueries({queryKey:['profile']})}/>:<p className='my-5 flex items-center gap-2 text-sm font-semibold text-primary'><ShieldCheck/>Contact verified · {p.phone}</p>}<form onSubmit={complete} className='mt-4 grid gap-4 sm:grid-cols-2'><h2 className='text-xl font-bold sm:col-span-2'>Pickup address</h2><label className='text-sm font-semibold'>Pincode<input aria-label='Pincode' inputMode='numeric' maxLength={6} required pattern='[0-9]{6}' value={f.pincode} onChange={e=>set('pincode')(e.target.value.replace(/\D/g,''))} className={input}/></label><label className='text-sm font-semibold'>City<input aria-label='City' required maxLength={80} value={f.city} onChange={e=>set('city')(e.target.value)} className={input}/></label><label className='text-sm font-semibold sm:col-span-2'>Full address<textarea aria-label='Full address' required minLength={8} maxLength={400} rows={3} value={f.address} onChange={e=>set('address')(e.target.value)} className='mt-1 w-full rounded-md border bg-card p-3'/></label><Button disabled={busy||!p?.phone_verified} type='submit' className='h-12 sm:col-span-2'>{busy?<Loader2 className='animate-spin'/>:<Check/>}Finish setup</Button></form></div>}</div></AppShell>;
 }
