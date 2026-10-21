@@ -10,6 +10,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { ROLE_LABEL, useRoles } from "@/hooks/use-roles";
 import { scoreBooking } from "@/lib/ops-rules";
 import { RoleWorkspace } from "@/components/site/RoleWorkspace";
+import { AdminShipmentTable } from "@/components/site/AdminShipmentTable";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Get Xpress" }, { name: "description", content: "Your Get Xpress shipping dashboard." }, { property: "og:title", content: "Dashboard — Get Xpress" }, { property: "og:description", content: "Your Get Xpress shipping dashboard." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
@@ -105,6 +106,7 @@ function Dashboard() {
 
       {primary && primary !== "admin" && primary !== "point" && <RoleWorkspace role={primary} />}
       {isAdmin && <BookingScores />}
+      {isAdmin && <AdminShipmentTable />}
 
       <div className="mt-8"><TrackPanel /></div>
       <div className="mt-10 flex items-center justify-between">
