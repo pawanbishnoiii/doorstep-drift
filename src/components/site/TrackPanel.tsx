@@ -17,7 +17,7 @@ const STEPS = [
 ];
 
 /** In-dashboard tracking by AWB or parcel barcode, with camera scan and live updates. */
-export function TrackPanel({ initial }: { initial?: string }) {
+export function TrackPanel({ initial }: { initial?: string | undefined }) {
   const [val, setVal] = useState(initial ?? "");
   const [id, setId] = useState(initial ?? "");
   const qc = useQueryClient();
