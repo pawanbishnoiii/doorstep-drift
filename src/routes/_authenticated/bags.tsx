@@ -7,6 +7,7 @@ import { ScanButton } from "@/components/site/BarcodeScanner";
 import { Button } from "@/components/ui/button";
 import { useRoles } from "@/hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
+import { buildBagLabelPdf, buildCodeSheetPdf, downloadBlob } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/bags")({
   head: () => ({ meta: [{ title: "Bags & manifests — Get Xpress" }, { name: "description", content: "Manage parcel bags, seals and transport manifests." }, { property: "og:title", content: "Get Xpress bags & manifests" }, { property: "og:description", content: "Scoped parcel bag and transport operations." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
@@ -17,7 +18,24 @@ type Lookup = { found: boolean; bag_id?: string; bag_code?: string; status?: str
 const inp = "h-11 min-w-0 flex-1 rounded-md border bg-card px-3";
 
 function Bags() {
-  const { isStaff } = useRoles();
+  const { isStaff, isAdmin } = useRoles();
+  const [genKind, setGenKind] = useState<"seal" | "plastic">("seal");
+  const [genCount, setGenCount] = useState("50");
+  const [genBusy, setGenBusy] = useState(false);
+  const generate = async () => {
+    const n = Number(genCount);
+    if (!Number.isInteger(n) || n < 1 || n > 2000) { toast.error("Enter between 1 and 2000"); return; }
+    setGenBusy(true);
+    const r = await supabase.rpc("generate_seal_codes", { _kind: genKind, _count: n });
+    if (r.error) { toast.error(r.error.message); setGenBusy(false); return; }
+    const codes = (r.data ?? []).map((x) => x.code);
+    downloadBlob(await buildCodeSheetPdf(codes, genKind === "seal" ? "SEAL TAG" : "PLASTIC BAG"), `getxpress-${genKind}-${codes[0]}-${codes.length}.pdf`);
+    toast.success(`${codes.length} unique ${genKind === "seal" ? "seal" : "plastic-bag"} codes generated`);
+    setGenBusy(false);
+  };
+  const printBag = async (b: (typeof bags)[number]) => {
+    downloadBlob(await buildBagLabelPdf({ bag_code: b.bag_code, destination: b.destination, seal_no: b.seal_no, plastic_bag_code: b.plastic_bag_code, created_at: b.created_at, pieces: b.bag_items.map((i) => ({ piece_code: i.shipment_pieces?.piece_code ?? "" })) }), `${b.bag_code}-label.pdf`);
+  };
   const qc = useQueryClient();
   const [tab, setTab] = useState("bags");
   const [destination, setDestination] = useState("");
@@ -52,6 +70,17 @@ function Bags() {
   return (
     <AppShell wide>
       <PageHeader title="Dispatch center" sub="Scan bag, seal and plastic-bag barcodes with the camera, add parcels and dispatch manifests." />
+      {isAdmin && (
+        <div className="mb-6 rounded-lg border bg-card p-4">
+          <p className="mb-2 font-bold">Generate seal / plastic-bag codes in bulk</p>
+          <div className="flex flex-wrap gap-2">
+            <select aria-label="Code type" value={genKind} onChange={(e) => setGenKind(e.target.value as "seal" | "plastic")} className="h-11 rounded-md border bg-card px-3"><option value="seal">Seal tags</option><option value="plastic">Plastic bags</option></select>
+            <input aria-label="How many codes" inputMode="numeric" value={genCount} onChange={(e) => setGenCount(e.target.value.replace(/\D/g, ""))} className="h-11 w-28 rounded-md border bg-card px-3" />
+            <Button onClick={generate} disabled={genBusy}>{genBusy ? "Generating…" : "Generate & download PDF"}</Button>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Every code is unique and never reused. Print the sheet and stick the barcodes on seals or plastic bags.</p>
+        </div>
+      )}
       {!isStaff ? <p>Staff access required.</p> : <>
         <section className="mb-6 rounded-lg border-2 border-primary/30 bg-primary/5 p-4">
           <p className="mb-2 font-bold">Scan any bag, seal or plastic-bag barcode</p>
@@ -76,7 +105,7 @@ function Bags() {
             </div>
           </section>}
           <div className="overflow-x-auto rounded-lg border bg-card"><table className="enterprise-table"><thead><tr><th>Bag</th><th>Destination</th><th>Status / Seal / Plastic</th><th>Parcels</th><th /></tr></thead><tbody>
-            {bags.map((b) => <tr key={b.id}><td className="font-mono font-bold">{b.bag_code}</td><td>{b.destination}</td><td className="capitalize">{b.status}<p className="text-xs normal-case">{b.seal_no}{b.plastic_bag_code && ` · ${b.plastic_bag_code}`}</p></td><td>{b.bag_items.length}<p className="max-w-56 break-words text-xs text-muted-foreground">{b.bag_items.map((p) => p.shipment_pieces?.piece_code).join(", ")}</p></td><td>{b.status === "open" && <Button variant="outline" onClick={() => { setBagId(b.id); setSeal(""); }}>Manage</Button>}</td></tr>)}
+            {bags.map((b) => <tr key={b.id}><td className="font-mono font-bold">{b.bag_code}</td><td>{b.destination}</td><td className="capitalize">{b.status}<p className="text-xs normal-case">{b.seal_no}{b.plastic_bag_code && ` · ${b.plastic_bag_code}`}</p></td><td>{b.bag_items.length}<p className="max-w-56 break-words text-xs text-muted-foreground">{b.bag_items.map((p) => p.shipment_pieces?.piece_code).join(", ")}</p></td><td>{b.status === "open" && <Button variant="outline" onClick={() => { setBagId(b.id); setSeal(""); }}>Manage</Button>}<Button variant="ghost" onClick={() => printBag(b)}>Print label</Button></td></tr>)}
           </tbody></table>{!bags.length && <p className="p-8 text-center text-muted-foreground">No bags in your scope.</p>}</div>
         </> : <>
           <form className="mb-6 border-y py-5" onSubmit={async (e) => { e.preventDefault(); const f = new FormData(e.currentTarget); if (result((await supabase.rpc("create_manifest", { _from: String(f.get("from")), _to: String(f.get("to")), _vehicle: String(f.get("vehicle")), _bag_ids: selected })).error, "Manifest dispatched")) setSelected([]); }}>
