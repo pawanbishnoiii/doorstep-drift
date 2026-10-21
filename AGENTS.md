@@ -23,3 +23,5 @@
 - Labels are generated client-side (`src/lib/labels.ts`, bwip-js Code 128 + qrcode + jsPDF) from saved records; every print/reprint is logged in `label_prints` and reprints require a reason. `awaiting_payment`/`cancelled` shipments cannot print.
 - Staff scan parcels via `/scan` → `scan_piece` rpc (staff-only, writes tracking_events + audit_logs). Shipment visibility is pincode-scoped through `can_access_pincode`.
 - Public base URL for QR/tracking links: `publicBaseUrl()` in `src/lib/brand.ts` (env `VITE_PUBLIC_BASE_URL`).
+- Menu visibility per role lives in `src/lib/access.ts` (`navVisible`) and is covered by `src/test/role-access.test.tsx`; data access is still enforced by RLS.
+- Customer tracking Q&A goes through `/api/public/track-assistant`, which only feeds `track_shipment` output to the model, so no personal data reaches AI.
