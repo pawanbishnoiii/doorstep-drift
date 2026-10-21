@@ -15,6 +15,13 @@
       "when": 1792568597141,
       "tag": "0001_phone_login_otps",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792568969677,
+      "tag": "0002_roles_onboarding_integrations_team_rates",
+      "breakpoints": true
     }
   ]
 }

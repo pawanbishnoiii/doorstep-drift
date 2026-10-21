@@ -24,6 +24,7 @@ import { Route as AuthenticatedConsoleRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedCouponsRouteImport } from './routes/_authenticated/coupons'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedPincodesRouteImport } from './routes/_authenticated/pincodes'
 import { Route as AuthenticatedReturnsRouteImport } from './routes/_authenticated/returns'
@@ -31,6 +32,7 @@ import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/s
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTallyRouteImport } from './routes/_authenticated/tally'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
+import { Route as AuthenticatedTeamPricesRouteImport } from './routes/_authenticated/team-prices'
 import { Route as AuthenticatedVerifyPhoneRouteImport } from './routes/_authenticated/verify-phone'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedLabelsShipmentIdRouteImport } from './routes/_authenticated/labels.$shipmentId'
@@ -118,6 +120,11 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -151,6 +158,11 @@ const AuthenticatedTallyRoute = AuthenticatedTallyRouteImport.update({
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
   path: '/team',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTeamPricesRoute = AuthenticatedTeamPricesRouteImport.update({
+  id: '/team-prices',
+  path: '/team-prices',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedVerifyPhoneRoute =
@@ -221,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/coupons': typeof AuthenticatedCouponsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/orders': typeof AuthenticatedOrdersRoute
   '/pincodes': typeof AuthenticatedPincodesRoute
   '/returns': typeof AuthenticatedReturnsRoute
@@ -228,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/tally': typeof AuthenticatedTallyRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/team-prices': typeof AuthenticatedTeamPricesRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
@@ -253,6 +267,7 @@ export interface FileRoutesByTo {
   '/coupons': typeof AuthenticatedCouponsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/orders': typeof AuthenticatedOrdersRoute
   '/pincodes': typeof AuthenticatedPincodesRoute
   '/returns': typeof AuthenticatedReturnsRoute
@@ -260,6 +275,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/tally': typeof AuthenticatedTallyRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/team-prices': typeof AuthenticatedTeamPricesRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
@@ -287,6 +303,7 @@ export interface FileRoutesById {
   '/_authenticated/coupons': typeof AuthenticatedCouponsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/pincodes': typeof AuthenticatedPincodesRoute
   '/_authenticated/returns': typeof AuthenticatedReturnsRoute
@@ -294,6 +311,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/tally': typeof AuthenticatedTallyRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/team-prices': typeof AuthenticatedTeamPricesRoute
   '/_authenticated/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/_authenticated/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
@@ -321,6 +339,7 @@ export interface FileRouteTypes {
     | '/coupons'
     | '/dashboard'
     | '/notifications'
+    | '/onboarding'
     | '/orders'
     | '/pincodes'
     | '/returns'
@@ -328,6 +347,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tally'
     | '/team'
+    | '/team-prices'
     | '/verify-phone'
     | '/wallet'
     | '/labels/$shipmentId'
@@ -353,6 +373,7 @@ export interface FileRouteTypes {
     | '/coupons'
     | '/dashboard'
     | '/notifications'
+    | '/onboarding'
     | '/orders'
     | '/pincodes'
     | '/returns'
@@ -360,6 +381,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tally'
     | '/team'
+    | '/team-prices'
     | '/verify-phone'
     | '/wallet'
     | '/labels/$shipmentId'
@@ -386,6 +408,7 @@ export interface FileRouteTypes {
     | '/_authenticated/coupons'
     | '/_authenticated/dashboard'
     | '/_authenticated/notifications'
+    | '/_authenticated/onboarding'
     | '/_authenticated/orders'
     | '/_authenticated/pincodes'
     | '/_authenticated/returns'
@@ -393,6 +416,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/tally'
     | '/_authenticated/team'
+    | '/_authenticated/team-prices'
     | '/_authenticated/verify-phone'
     | '/_authenticated/wallet'
     | '/_authenticated/labels/$shipmentId'
@@ -522,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/orders': {
       id: '/_authenticated/orders'
       path: '/orders'
@@ -569,6 +600,13 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof AuthenticatedTeamRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/team-prices': {
+      id: '/_authenticated/team-prices'
+      path: '/team-prices'
+      fullPath: '/team-prices'
+      preLoaderRoute: typeof AuthenticatedTeamPricesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/verify-phone': {
@@ -646,6 +684,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCouponsRoute: typeof AuthenticatedCouponsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedPincodesRoute: typeof AuthenticatedPincodesRoute
   AuthenticatedReturnsRoute: typeof AuthenticatedReturnsRoute
@@ -653,6 +692,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTallyRoute: typeof AuthenticatedTallyRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedTeamPricesRoute: typeof AuthenticatedTeamPricesRoute
   AuthenticatedVerifyPhoneRoute: typeof AuthenticatedVerifyPhoneRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedLabelsShipmentIdRoute: typeof AuthenticatedLabelsShipmentIdRoute
@@ -672,6 +712,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCouponsRoute: AuthenticatedCouponsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedPincodesRoute: AuthenticatedPincodesRoute,
   AuthenticatedReturnsRoute: AuthenticatedReturnsRoute,
@@ -679,6 +720,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTallyRoute: AuthenticatedTallyRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedTeamPricesRoute: AuthenticatedTeamPricesRoute,
   AuthenticatedVerifyPhoneRoute: AuthenticatedVerifyPhoneRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedLabelsShipmentIdRoute: AuthenticatedLabelsShipmentIdRoute,

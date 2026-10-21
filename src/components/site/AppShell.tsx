@@ -28,6 +28,8 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/bags", label: "Dispatch center", icon: Boxes, staff: true },
     { to: "/wallet", label: "Wallet", icon: Wallet, wallet: true },
     { to: "/analytics", label: "Analytics", icon: BarChart3, staff: true },
+    { to: "/team-prices", label: "Team prices", icon: Coins, staff: true },
+    { to: "/onboarding", label: "My profile", icon: UserRound },
   ] },
   { group: "Admin", items: [
     { to: "/team", label: "Users & last seen", icon: Users, admin: true },
@@ -47,7 +49,7 @@ function Clock() {
 }
 
 /** Signed-in frame: Shiprocket-style sidebar on desktop, app-style tab bar on phones. Requires verified phone. */
-export function AppShell({ children, requirePhone = true, wide = false }: { children: ReactNode; requirePhone?: boolean; wide?: boolean }) {
+export function AppShell({ children, requirePhone = true, wide = false, skipOnboarding = false }: { children: ReactNode; requirePhone?: boolean; wide?: boolean; skipOnboarding?: boolean }) {
   const { data, isLoading } = useProfile();
   const { isStaff, isAdmin, primary, roles } = useRoles();
   const isManager = roles.some((r) => r === "state_manager" || r === "state_director");
@@ -56,6 +58,7 @@ export function AppShell({ children, requirePhone = true, wide = false }: { chil
   const navigate = useNavigate();
   if (isLoading) return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   if (requirePhone && !data?.profile?.phone_verified) return <Navigate to="/verify-phone" replace />;
+  if (requirePhone && !skipOnboarding && !data?.profile?.onboarded_at) return <Navigate to="/onboarding" replace />;
   const signOut = async () => {
     await qc.cancelQueries(); qc.clear();
     await supabase.auth.signOut();

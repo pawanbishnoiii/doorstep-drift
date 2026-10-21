@@ -64,6 +64,9 @@ export const createShipment = createServerFn({ method: "POST" })
     const [{data:rateRows,error:rateError},{data:settings,error:settingsError}] = await Promise.all([sb.from("service_rates").select("*"),sb.from("app_settings").select("cash_on_pickup").eq("id",true).single()]);
     if(rateError || settingsError) throw new Error("Delivery settings could not be loaded.");
     const rates:ServiceRates={}; for(const r of rateRows??[]) rates[r.service as ServiceLevel]={base:Number(r.base),perKg:Number(r.per_kg),active:r.active};
+    // Team (state) prices set by the pickup state's managers override the national rate.
+    const { data: teamRows } = await sb.from("state_rates").select("*").eq("state", from.state);
+    for (const r of teamRows ?? []) rates[r.service as ServiceLevel] = { base: Number(r.base), perKg: Number(r.per_kg), active: r.active };
     if(!serviceAllowed(data.service,from.city,to.city,rates)) throw new Error("This service is unavailable for the selected cities.");
     if(data.payment_method==="cash_on_pickup" && !settings?.cash_on_pickup) throw new Error("Pay at pickup is currently disabled.");
     const totalKg = data.pieces.reduce((a, p) => a + p.weight_kg, 0);
