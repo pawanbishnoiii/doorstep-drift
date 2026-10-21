@@ -44,6 +44,89 @@ export type Database = {
         }
         Relationships: []
       }
+      bag_items: {
+        Row: {
+          added_by: string
+          bag_id: string
+          created_at: string
+          id: string
+          piece_id: string
+        }
+        Insert: {
+          added_by: string
+          bag_id: string
+          created_at?: string
+          id?: string
+          piece_id: string
+        }
+        Update: {
+          added_by?: string
+          bag_id?: string
+          created_at?: string
+          id?: string
+          piece_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bag_items_bag_id_fkey"
+            columns: ["bag_id"]
+            isOneToOne: false
+            referencedRelation: "bags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bag_items_piece_id_fkey"
+            columns: ["piece_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_pieces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bags: {
+        Row: {
+          bag_code: string
+          created_at: string
+          created_by: string
+          destination: string
+          id: string
+          manifest_id: string | null
+          seal_no: string | null
+          sealed_at: string | null
+          status: string
+        }
+        Insert: {
+          bag_code: string
+          created_at?: string
+          created_by: string
+          destination: string
+          id?: string
+          manifest_id?: string | null
+          seal_no?: string | null
+          sealed_at?: string | null
+          status?: string
+        }
+        Update: {
+          bag_code?: string
+          created_at?: string
+          created_by?: string
+          destination?: string
+          id?: string
+          manifest_id?: string | null
+          seal_no?: string | null
+          sealed_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bags_manifest_fk"
+            columns: ["manifest_id"]
+            isOneToOne: false
+            referencedRelation: "manifests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupon_redemptions: {
         Row: {
           coupon_id: string
@@ -195,6 +278,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      manifests: {
+        Row: {
+          created_at: string
+          created_by: string
+          from_location: string
+          id: string
+          manifest_code: string
+          received_at: string | null
+          received_by: string | null
+          status: string
+          to_location: string
+          vehicle_no: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          from_location: string
+          id?: string
+          manifest_code: string
+          received_at?: string | null
+          received_by?: string | null
+          status?: string
+          to_location: string
+          vehicle_no?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          from_location?: string
+          id?: string
+          manifest_code?: string
+          received_at?: string | null
+          received_by?: string | null
+          status?: string
+          to_location?: string
+          vehicle_no?: string | null
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -455,6 +577,50 @@ export type Database = {
         }
         Relationships: []
       }
+      point_commissions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          point_user_id: string
+          rate: number
+          settled_at: string | null
+          settled_by: string | null
+          shipment_id: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          point_user_id: string
+          rate: number
+          settled_at?: string | null
+          settled_by?: string | null
+          shipment_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          point_user_id?: string
+          rate?: number
+          settled_at?: string | null
+          settled_by?: string | null
+          shipment_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_commissions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: true
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_type: string
@@ -490,6 +656,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      returns: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          reason: string
+          requested_by: string
+          return_awb: string | null
+          shipment_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          reason: string
+          requested_by: string
+          return_awb?: string | null
+          shipment_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          reason?: string
+          requested_by?: string
+          return_awb?: string | null
+          shipment_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "returns_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shipment_pieces: {
         Row: {
@@ -751,6 +961,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_piece_to_bag: {
+        Args: { _bag_id: string; _code: string }
+        Returns: Json
+      }
       admin_exists: { Args: never; Returns: boolean }
       allocate_pincode: {
         Args: {
@@ -766,6 +980,20 @@ export type Database = {
         Returns: boolean
       }
       claim_first_admin: { Args: never; Returns: boolean }
+      create_bag: { Args: { _destination: string }; Returns: Json }
+      create_manifest: {
+        Args: {
+          _bag_ids: string[]
+          _from: string
+          _to: string
+          _vehicle: string
+        }
+        Returns: Json
+      }
+      create_return: {
+        Args: { _awb: string; _kind: string; _reason: string }
+        Returns: Json
+      }
       dashboard_summary: { Args: never; Returns: Json }
       find_user_by_phone: {
         Args: { _phone: string }
@@ -796,6 +1024,7 @@ export type Database = {
       is_staff: { Args: { _u: string }; Returns: boolean }
       next_awb: { Args: never; Returns: string }
       next_piece_code: { Args: never; Returns: string }
+      receive_manifest: { Args: { _manifest_id: string }; Returns: undefined }
       release_pincode: { Args: { _allocation_id: string }; Returns: undefined }
       scan_piece: {
         Args: {
@@ -806,6 +1035,8 @@ export type Database = {
         }
         Returns: Json
       }
+      seal_bag: { Args: { _bag_id: string; _seal: string }; Returns: undefined }
+      settle_commissions: { Args: { _ids: string[] }; Returns: number }
       staff_directory: {
         Args: never
         Returns: {
@@ -820,6 +1051,10 @@ export type Database = {
       transfer_pincode: {
         Args: { _allocation_id: string; _new_holder: string; _note?: string }
         Returns: string
+      }
+      update_return_status: {
+        Args: { _return_id: string; _status: string }
+        Returns: undefined
       }
     }
     Enums: {
