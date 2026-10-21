@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { TrackPanel } from "@/components/site/TrackPanel";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -17,7 +18,7 @@ type Summary = { shipments: number; today: number; revenue: number; by_status: R
 
 function Dashboard() {
   const { data: me } = useProfile();
-  const { roles, primary, isStaff, isAdmin } = useRoles();
+  const { roles, primary, isStaff, isAdmin, isLoading: rolesLoading } = useRoles();
   const qc = useQueryClient();
   const name = (me?.profile?.full_name || (me?.user.user_metadata?.["full_name"] as string | undefined) || "there").split(" ")[0];
 
@@ -34,6 +35,7 @@ function Dashboard() {
     toast.success("You are now the Admin");
     qc.invalidateQueries();
   };
+  if (!rolesLoading && !isStaff && noAdmin === false) return <Navigate to="/users/dashboard" />;
   const max = Math.max(1, ...(sum?.last7 ?? []).map((x) => x.n));
 
   return (
@@ -49,12 +51,12 @@ function Dashboard() {
       )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Link to="/ship" className="rounded-lg bg-primary p-5 text-primary-foreground shadow-glow"><PackagePlus className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Add order</p></Link>
-        <Link to="/track" className="rounded-lg bg-lime p-5 text-ink"><PackageSearch className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Track parcel</p></Link>
+        <Link to="/users/addorder" className="rounded-lg bg-primary p-5 text-primary-foreground shadow-glow"><PackagePlus className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Book parcel</p></Link>
+        <Link to="/tally" className="rounded-lg bg-lime p-5 text-ink"><PackageSearch className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Delivery tally</p></Link>
         {isStaff ? <>
           <Link to="/scan" className="rounded-lg bg-ink p-5 text-ink-foreground"><ScanLine className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Scan parcel</p></Link>
-          <Link to="/console" className="rounded-lg border bg-card p-5"><ShieldCheck className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Pincodes & staff</p></Link>
-        </> : <Link to="/point-partner" className="col-span-2 rounded-lg border bg-card p-5 md:col-span-2"><Store className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Become a Get Xpress Point</p></Link>}
+          {isAdmin ? <Link to="/console" className="rounded-lg border bg-card p-5"><ShieldCheck className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Pincodes & staff</p></Link> : <Link to="/wallet" className="rounded-lg border bg-card p-5"><ShieldCheck className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Wallet</p></Link>}
+        </> : <Link to="/point-partner" className="col-span-2 rounded-lg border bg-card p-5 md:col-span-2"><Store className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Become a Get Xpress Hub</p></Link>}
       </div>
 
       {isStaff && sum && (
@@ -92,14 +94,14 @@ function Dashboard() {
               </div>
               <div className="mt-4 flex gap-2">
                 <Link to="/analytics" className="rounded-xl border px-3 py-2 text-xs font-bold">Full analytics</Link>
-                <Link to="/console" className="flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-bold"><MapPin className="h-3 w-3" /> Allocations</Link>
-                <Link to="/console" className="flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-bold"><Users className="h-3 w-3" /> Team</Link>
+                {isAdmin && <><Link to="/console" className="flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-bold"><MapPin className="h-3 w-3" /> Allocations</Link><Link to="/team" className="flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-bold"><Users className="h-3 w-3" /> Users</Link></>}
               </div>
             </div>
           </div>
         </section>
       )}
 
+      <div className="mt-8"><TrackPanel /></div>
       <div className="mt-10 flex items-center justify-between">
         <h2 className="font-display text-2xl font-extrabold">Recent orders</h2>
         <Link to="/orders" className="text-sm font-bold text-primary">View all →</Link>
@@ -107,7 +109,7 @@ function Dashboard() {
       <div className="mt-4 space-y-2">
         {mine.length === 0 && <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">No orders yet — add your first order.</p>}
         {mine.map((s) => (
-          <Link key={s.id} to="/track" search={{ id: s.tracking_number }} className="flex items-center justify-between rounded-2xl border bg-card p-4">
+          <Link key={s.id} to="/users/dashboard" search={{ track: s.tracking_number }} className="flex items-center justify-between rounded-2xl border bg-card p-4">
             <div><p className="font-bold">{s.sender_city} → {s.receiver_city}</p><p className="font-mono text-xs text-muted-foreground">{s.tracking_number}</p></div>
             <div className="text-right"><span className="rounded-full bg-cream px-3 py-1 text-xs font-bold capitalize">{s.status.replaceAll("_", " ")}</span><p className="mt-1 text-sm font-bold">₹{s.price}</p></div>
           </Link>
