@@ -7,7 +7,7 @@ export function SiteFooter() {
     <footer className="bg-ink px-4 pb-32 pt-16 text-ink-foreground md:px-8 md:pb-12">
       <div className="mx-auto grid max-w-[1240px] gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <span className="inline-block rounded-xl bg-card px-3 py-2"><img src={solidLogo.url} alt="Get Xpress" className="h-12 w-48 object-contain" /></span>
+          <img src={solidLogo.url} alt="Get Xpress" className="h-14 w-52 rounded-lg object-contain" />
           <p className="mt-4 max-w-sm text-sm opacity-70">{brand.tagline} Courier and shipping across India from your nearest Get Xpress Point.</p>
           <p className="mt-4 text-xs opacity-50">{brand.domain} · {brand.supportEmail}</p>
         </div>
