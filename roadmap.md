@@ -16,6 +16,8 @@
 - [ ] Separate dashboards per role (hub, area/state manager, director, admin) + 5-digit user IDs, last seen
 - [ ] Hub wallet (top-up, booking deduction, commissions, history)
 - [ ] Bags & manifests rename + seal/bag barcode scan; hub delivery tally + delivery score; camera scanning
-- [ ] Login page redesign (scooter courier) + phone login
+- [x] Login page redesign (scooter courier) + phone login
+- [x] Rule-based parcel exception helper on scan page; booking quality scores on admin dashboard
+- [ ] Role dashboards for state/area manager + network, team pricing, dispatch seal/bag camera scans, admin integrations settings, landing GSAP + size icons, onboarding (name/gender/age/GPS address), admin emails on booking/application (needs sender domain)
 - [ ] Dynamic hub application form (pincode autofill, state/district/city, WhatsApp, age, gender)
 - [ ] Landing page GSAP + parcel size icons; admin integrations (SMTP, payments, OTP, WhatsApp)
