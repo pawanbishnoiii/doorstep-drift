@@ -1032,6 +1032,7 @@ export type Database = {
         }
         Returns: string
       }
+      can_access_bag: { Args: { _bag: string }; Returns: boolean }
       can_access_pincode: {
         Args: { _pin: string; _user: string }
         Returns: boolean

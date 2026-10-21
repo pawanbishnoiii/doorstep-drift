@@ -15,6 +15,13 @@
       "when": 1792558600839,
       "tag": "0001_booking_settings_and_parcel_dimensions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792558810260,
+      "tag": "0002_operations_scope_guards_and_public_coupon_preview",
+      "breakpoints": true
     }
   ]
 }
