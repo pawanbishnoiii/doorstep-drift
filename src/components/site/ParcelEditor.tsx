@@ -2,6 +2,15 @@ import { Box, FileText, Plus, Ruler, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { boxPresets, volumetric } from "@/lib/pricing";
 import { newPiece, type BookingDraft } from "@/lib/booking-draft";
+import imgSmall from "@/assets/parcel-small.png";
+import imgMedium from "@/assets/parcel-medium.png";
+import imgLarge from "@/assets/parcel-large.png";
+import imgXl from "@/assets/parcel-xl.png";
+import imgFlyer from "@/assets/parcel-flyer.png";
+import imgCard from "@/assets/parcel-card.png";
+import imgA4 from "@/assets/parcel-a4.png";
+import imgPack from "@/assets/parcel-docpack.png";
+const PRESET_IMG: Record<string, string> = { small: imgSmall, medium: imgMedium, large: imgLarge, extra_large: imgXl, document: imgFlyer, card: imgCard, a4: imgA4, document_pack: imgPack };
 export function ParcelEditor({ pieces, onChange }: { pieces:BookingDraft["pieces"]; onChange:(pieces:BookingDraft["pieces"])=>void }) {
   const update=(i:number,p:Partial<BookingDraft["pieces"][number]>)=>onChange(pieces.map((x,j)=>j===i?{...x,...p}:x));
   return <div className="space-y-5">{pieces.map((p,i)=><div key={p.id} className="rounded-lg border bg-card p-4 md:p-5">
