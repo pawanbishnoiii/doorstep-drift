@@ -69,7 +69,7 @@ function PointPartner() {
       <section className="hero-shell relative bg-hero px-4 pb-16 pt-28 md:px-8 md:pt-40">
         <div className="mx-auto grid max-w-[1240px] items-center gap-12 lg:grid-cols-2">
           <div className="text-center lg:text-left">
-            <span className="hero-rise inline-flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs font-extrabold"><Store className="h-4 w-4 text-primary" /> Get Xpress Point Partner Program</span>
+            <span className="hero-rise inline-flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs font-extrabold"><Store className="h-4 w-4 text-primary" /> Get Xpress Hub Partner Program</span>
             <h1 className="hero-rise mt-6 font-display text-[clamp(2.8rem,7vw,6rem)] font-extrabold leading-[.9] tracking-[-.05em]">Your shop.<br /><span className="text-primary">Our network.</span><br />Shared growth.</h1>
             <p className="hero-rise mx-auto mt-6 max-w-lg text-lg text-muted-foreground lg:mx-0">Kirana, mobile shop, stationery or boutique — turn any counter into a mini hub and earn on every parcel. Zero franchise fee.</p>
             <div className="hero-rise mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
@@ -120,7 +120,7 @@ function PointPartner() {
 
       <section className="timeline-shell px-4 pb-24 md:px-8">
         <div className="mx-auto grid max-w-[1240px] items-center gap-12 lg:grid-cols-2">
-          <img src={hubTeam} alt="Get Xpress Point team" loading="lazy" className="reveal rounded-[36px] object-cover shadow-soft" />
+          <img src={hubTeam} alt="Get Xpress Hub team" loading="lazy" className="reveal rounded-[36px] object-cover shadow-soft" />
           <div>
             <h2 className="reveal font-display text-4xl font-extrabold md:text-5xl">Live in 4 simple steps</h2>
             <div className="mt-8 space-y-3">
@@ -182,7 +182,7 @@ function ApplySection() {
       <div className="mx-auto grid max-w-[1100px] gap-10 lg:grid-cols-[.8fr_1.2fr]">
         <div>
           <ParcelLottie className="h-32 w-32" />
-          <h2 className="font-display text-4xl font-extrabold md:text-5xl">Apply to become a Point</h2>
+          <h2 className="font-display text-4xl font-extrabold md:text-5xl">Apply to become a Hub</h2>
           <p className="mt-3 text-muted-foreground">Takes 3 minutes. Our partner team reviews every application personally.</p>
           {apps.length > 0 && (
             <div className="mt-8 space-y-2">

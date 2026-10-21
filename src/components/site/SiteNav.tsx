@@ -12,7 +12,7 @@ export function SiteNav() {
         <div className="hidden items-center gap-7 text-sm font-semibold text-muted-foreground md:flex">
           <Link to="/track" className="hover:text-ink" activeProps={{ className: "text-ink" }}>Track</Link>
           <Link to="/ship" className="hover:text-ink" activeProps={{ className: "text-ink" }}>Ship now</Link>
-          <Link to="/point-partner" className="hover:text-ink" activeProps={{ className: "text-ink" }}>Become a Point</Link>
+          <Link to="/point-partner" className="hover:text-ink" activeProps={{ className: "text-ink" }}>Become a Hub</Link>
         </div>
         <Link to={user ? "/dashboard" : "/auth"} className="group flex items-center gap-2 rounded-[14px] bg-ink px-4 py-2.5 text-sm font-bold text-ink-foreground transition-transform hover:-translate-y-0.5">
           {user ? "My shipments" : "Sign in"} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

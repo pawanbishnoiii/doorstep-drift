@@ -8,3 +8,14 @@
 - [ ] Professional dashboard navigation and end-to-end checks.
 - [ ] App email sending — blocked until an owned sender domain is configured.
 - [ ] Real online payments and SMS — blocked on provider credentials; retain clearly labelled demo/on-screen OTP.
+
+## Open (Oct 21 request)
+- [x] Serviceable pincodes loaded (19k India pincodes)
+- [x] "Point" renamed to "Hub" on public pages
+- [ ] /users/dashboard, /users/orders, /users/addorder, /users/returns (customer area, in-dashboard tracking)
+- [ ] Separate dashboards per role (hub, area/state manager, director, admin) + 5-digit user IDs, last seen
+- [ ] Hub wallet (top-up, booking deduction, commissions, history)
+- [ ] Bags & manifests rename + seal/bag barcode scan; hub delivery tally + delivery score; camera scanning
+- [ ] Login page redesign (scooter courier) + phone login
+- [ ] Dynamic hub application form (pincode autofill, state/district/city, WhatsApp, age, gender)
+- [ ] Landing page GSAP + parcel size icons; admin integrations (SMTP, payments, OTP, WhatsApp)
