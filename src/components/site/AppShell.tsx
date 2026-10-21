@@ -60,7 +60,7 @@ export function AppShell({ children, requirePhone = true, wide = false, skipOnbo
   const qc = useQueryClient();
   const navigate = useNavigate();
   if (isLoading) return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
-  if (requirePhone && !data?.profile?.phone_verified) return <Navigate to="/verify-phone" replace />;
+  if (requirePhone && !data?.profile?.phone_verified) return <Navigate to="/onboarding" replace />;
   if (requirePhone && !skipOnboarding && !data?.profile?.onboarded_at) return <Navigate to="/onboarding" replace />;
   const signOut = async () => {
     await qc.cancelQueries(); qc.clear();

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { LocateFixed, Loader2 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/AppShell";
+import { PhoneVerify } from "@/components/site/PhoneVerify";
 import { PinAutocomplete } from "@/components/site/PinAutocomplete";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/use-profile";
@@ -63,7 +64,8 @@ function Onboarding() {
 
   const input = "mt-1 h-12 w-full rounded-xl border bg-card px-4";
   return (
-    <AppShell skipOnboarding>
+    <AppShell skipOnboarding requirePhone={false}>
+      {data && !p?.phone_verified ? <PhoneVerify onDone={() => qc.invalidateQueries({ queryKey: ["profile"] })} /> : <>
       <PageHeader title="Complete your profile" sub={`Signed in as +91 ${p?.phone ?? ""}`} />
       <form onSubmit={save} className="grid max-w-2xl gap-4">
         <label className="text-sm font-semibold">Full name<input required value={f.full_name} onChange={(e) => set("full_name")(e.target.value)} className={input} /></label>
@@ -81,6 +83,7 @@ function Onboarding() {
         <label className="text-sm font-semibold">Address<textarea required rows={3} value={f.address} onChange={(e) => set("address")(e.target.value)} className="mt-1 w-full rounded-xl border bg-card p-4" /></label>
         <Button type="submit" className="h-12" disabled={busy}>{busy && <Loader2 className="animate-spin" />} Save and continue</Button>
       </form>
+      </>}
     </AppShell>
   );
 }
