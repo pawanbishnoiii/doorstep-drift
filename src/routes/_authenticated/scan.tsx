@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Camera, CheckCircle2, Loader2, ScanLine } from "lucide-react";
 import { AppShell } from "@/components/site/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { classifyException } from "@/lib/ops-rules";
 
 export const Route = createFileRoute("/_authenticated/scan")({
   head: () => ({ meta: [{ title: "Scan parcel — Get Xpress" }, { name: "description", content: "Scan a parcel barcode or QR to update its status." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
@@ -88,7 +89,16 @@ function Scan() {
           ))}
         </div>
         <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location (e.g. Jaipur hub)" className="h-12 w-full rounded-2xl border bg-card px-4 font-semibold outline-none" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" className="h-12 w-full rounded-2xl border bg-card px-4 font-semibold outline-none" />
+        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={status === "exception" ? "Describe the problem (e.g. box damaged, receiver not available)" : "Note (optional)"} className="h-12 w-full rounded-2xl border bg-card px-4 font-semibold outline-none" />
+        {status === "exception" && note.trim().length > 3 && (() => {
+          const c = classifyException(note);
+          return (
+            <div className="rounded-2xl border bg-card p-4 text-sm">
+              <p className="font-bold">{c.category} <span className={`ml-2 rounded-full px-2 py-0.5 text-xs uppercase ${c.severity === "high" ? "bg-destructive text-destructive-foreground" : "bg-muted"}`}>{c.severity}</span></p>
+              <p className="mt-1 text-muted-foreground">Next step: {c.action}</p>
+            </div>
+          );
+        })()}
         <button onClick={submit} disabled={busy || !code.trim()} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-bold text-primary-foreground disabled:opacity-40">
           {busy && <Loader2 className="h-5 w-5 animate-spin" />} Record scan
         </button>
