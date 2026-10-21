@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireUser as requireSupabaseAuth } from "@/lib/auth-guard";
 
 /** Pincode/city autosuggest for signed-in users (booking + admin screens). */
 export const searchPincodes = createServerFn({ method: "GET" })

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireUser as requireSupabaseAuth } from "@/lib/auth-guard";
 
 // Development mode: no SMS provider is connected yet, so the code is returned
 // to the client and shown on screen. Flip to false once MSG91/Fast2SMS is wired.

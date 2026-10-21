@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireUser as requireSupabaseAuth } from "@/lib/auth-guard";
 import type { GeoHit } from "./geo";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";

@@ -100,3 +100,49 @@ export function downloadBlob(blob: Blob, filename: string) {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
+
+/** A4 sheet of barcode stickers (3×8 per page) for bulk seal / plastic-bag codes. */
+export async function buildCodeSheetPdf(codes: string[], title: string) {
+  const { jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const cols = 3, rows = 8, w = 66, h = 34, mx = 6, my = 12;
+  for (let i = 0; i < codes.length; i++) {
+    const slot = i % (cols * rows);
+    if (i > 0 && slot === 0) doc.addPage();
+    if (slot === 0) { doc.setFontSize(8); doc.text(`${brand.name} · ${title}`, mx, 7); }
+    const x = mx + (slot % cols) * w, y = my + Math.floor(slot / cols) * h;
+    const code = codes[i]!;
+    const b = await code128(code);
+    doc.setDrawColor(200); doc.rect(x + 1, y + 1, w - 2, h - 2);
+    const bw = w - 10, bh = Math.min(22, (bw * b.h) / b.w);
+    doc.addImage(b.url, "PNG", x + 5, y + 4, bw, bh);
+    doc.setFontSize(7); doc.text(title, x + w / 2, y + h - 3, { align: "center" });
+  }
+  return doc.output("blob");
+}
+
+export type BagLabel = { bag_code: string; destination: string; seal_no: string | null; plastic_bag_code: string | null; created_at: string; pieces: { piece_code: string; tracking_number?: string | null }[] };
+
+/** 100×150 mm hub bag label: bag barcode, QR, destination and list of parcels in the bag. */
+export async function buildBagLabelPdf(bag: BagLabel) {
+  const { jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ unit: "mm", format: [100, 150] });
+  doc.setFillColor(0, 0, 0); doc.rect(2, 2, 96, 12, "F");
+  doc.setTextColor(255); doc.setFontSize(13); doc.text(`${brand.name} · HUB BAG`, 5, 10);
+  doc.setTextColor(0);
+  const b = await code128(bag.bag_code);
+  doc.addImage(b.url, "PNG", 5, 17, 62, Math.min(22, (62 * b.h) / b.w));
+  doc.addImage(await qr(trackUrl(bag.bag_code)), "PNG", 72, 16, 24, 24);
+  doc.setFontSize(9);
+  doc.text(`To: ${bag.destination}`, 5, 46);
+  doc.text(`Seal: ${bag.seal_no ?? "—"}   Plastic: ${bag.plastic_bag_code ?? "—"}`, 5, 51);
+  doc.text(`Created: ${new Date(bag.created_at).toLocaleString("en-IN")}   Parcels: ${bag.pieces.length}`, 5, 56);
+  doc.line(5, 59, 95, 59);
+  doc.setFontSize(7.5);
+  bag.pieces.slice(0, 40).forEach((p, i) => {
+    const x = i < 20 ? 5 : 52, y = 64 + (i % 20) * 4.1;
+    doc.text(`${i + 1}. ${p.piece_code}${p.tracking_number ? ` (${p.tracking_number})` : ""}`, x, y);
+  });
+  if (bag.pieces.length > 40) doc.text(`+ ${bag.pieces.length - 40} more parcels — see manifest`, 5, 147);
+  return doc.output("blob");
+}

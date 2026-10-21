@@ -25,3 +25,4 @@
 - Public base URL for QR/tracking links: `publicBaseUrl()` in `src/lib/brand.ts` (env `VITE_PUBLIC_BASE_URL`).
 - Menu visibility per role lives in `src/lib/access.ts` (`navVisible`) and is covered by `src/test/role-access.test.tsx`; data access is still enforced by RLS.
 - Customer tracking Q&A goes through `/api/public/track-assistant`, which only feeds `track_shipment` output to the model, so no personal data reaches AI.
+- Signed-in server functions use requireUser from src/lib/auth-guard.ts (getUser verification) instead of the generated JWKS middleware, because local key verification failed after remixing.

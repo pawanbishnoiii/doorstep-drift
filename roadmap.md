@@ -38,3 +38,15 @@
 - [x] 10 parcel pictures in booking parcel picker + size guide.
 - [ ] SMS (MSG91/Fast2SMS) and Razorpay — blocked: no API keys yet.
 - [ ] Scan sounds, bulk seal/plastic-bag code generator, bag labels, AI booking summaries, Area/Cluster pincode flow — next round.
+
+## Oct 21 (round 2)
+- [x] Server sign-in check verifies with auth server (fixes "No suitable key or wrong key type")
+- [x] Google sign-in provider enabled
+- [x] Phone verification merged into onboarding; /verify-phone redirects
+- [x] OTP required to confirm each booking
+- [x] Bulk seal / plastic-bag code generator (Admin, PDF sheet)
+- [x] Printable hub bag labels
+- [x] Parcel images compressed to small WebP
+- [ ] Landing page redesign to match /point-partner (fonts, GSAP)
+- [ ] Faster dual-provider (Google + OSM) Get a quote suggestions
+- [ ] Demo data + full end-to-end flow test
