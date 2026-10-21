@@ -1,8 +1,8 @@
 export type ServiceLevel = "standard" | "express" | "same_day";
 
 export const services: Record<ServiceLevel, { label: string; eta: string; base: number; perKg: number }> = {
-  standard: { label: "Standard", eta: "3–5 days", base: 49, perKg: 30 },
-  express: { label: "Express", eta: "1–2 days", base: 89, perKg: 55 },
+  standard: { label: "Standard", eta: "3–5 business days", base: 49, perKg: 30 },
+  express: { label: "Express", eta: "1–2 business days", base: 89, perKg: 55 },
   same_day: { label: "Same day (intra-city)", eta: "Today", base: 149, perKg: 70 },
 };
 

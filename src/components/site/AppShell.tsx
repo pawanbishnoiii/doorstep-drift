@@ -2,7 +2,7 @@ import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
-  BarChart3, Bell, ClipboardList, Home, Loader2, LogOut, MapPin, PackagePlus, PackageSearch, ScanLine, ShieldCheck, Store, Ticket, UserRound,
+  BarChart3, Bell, ClipboardList, Home, Loader2, LogOut, MapPin, PackagePlus, PackageSearch, ScanLine, ShieldCheck, Store, Ticket, UserRound, RotateCcw, Boxes, Coins, Settings,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { useProfile } from "@/hooks/use-profile";
@@ -17,15 +17,20 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/orders", label: "Orders", icon: ClipboardList },
     { to: "/track", label: "Track", icon: PackageSearch },
     { to: "/notifications", label: "Notifications", icon: Bell },
+    { to: "/returns", label: "Returns & RTO", icon: RotateCcw },
   ] },
   { group: "Operations", items: [
     { to: "/analytics", label: "Analytics", icon: BarChart3, staff: true },
     { to: "/scan", label: "Scan parcels", icon: ScanLine, staff: true },
     { to: "/console", label: "Pincodes & staff", icon: MapPin, staff: true },
+    { to: "/bags", label: "Bags & manifests", icon: Boxes, staff: true },
+    { to: "/commissions", label: "Commissions", icon: Coins, staff: true },
   ] },
   { group: "Admin", items: [
     { to: "/applications", label: "Point applications", icon: Store, admin: true },
     { to: "/coupons", label: "Offers & coupons", icon: Ticket, admin: true },
+    { to: "/pincodes", label: "Pincode master", icon: MapPin, admin: true },
+    { to: "/settings", label: "Delivery & email", icon: Settings, admin: true },
   ] },
 ];
 
@@ -122,7 +127,7 @@ export function PageHeader({ title, sub, action }: { title: string; sub?: string
 export function Stat({ label, value, tone = "card" }: { label: string; value: ReactNode; tone?: "card" | "primary" | "ink" | "lime" }) {
   const cls = { card: "border bg-card", primary: "bg-primary text-primary-foreground", ink: "bg-ink text-ink-foreground", lime: "bg-lime text-ink" }[tone];
   return (
-    <div className={`rounded-3xl p-5 ${cls}`}>
+    <div className={`rounded-lg p-5 ${cls}`}>
       <p className="text-xs font-bold uppercase tracking-wider opacity-70">{label}</p>
       <p className="mt-2 font-display text-3xl font-extrabold">{value}</p>
     </div>
