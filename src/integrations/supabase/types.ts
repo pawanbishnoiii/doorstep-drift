@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          cash_on_pickup: boolean
+          id: boolean
+          updated_at: string
+        }
+        Insert: {
+          cash_on_pickup?: boolean
+          id?: boolean
+          updated_at?: string
+        }
+        Update: {
+          cash_on_pickup?: boolean
+          id?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -494,6 +512,7 @@ export type Database = {
         Row: {
           active: boolean
           city: string
+          hub_name: string | null
           pincode: string
           state: string
           tier: string | null
@@ -502,6 +521,7 @@ export type Database = {
         Insert: {
           active?: boolean
           city: string
+          hub_name?: string | null
           pincode: string
           state: string
           tier?: string | null
@@ -510,6 +530,7 @@ export type Database = {
         Update: {
           active?: boolean
           city?: string
+          hub_name?: string | null
           pincode?: string
           state?: string
           tier?: string | null
@@ -662,8 +683,10 @@ export type Database = {
           created_at: string
           id: string
           kind: string
+          pickup_at: string | null
           reason: string
           requested_by: string
+          restocking_status: string
           return_awb: string | null
           shipment_id: string
           status: string
@@ -673,8 +696,10 @@ export type Database = {
           created_at?: string
           id?: string
           kind: string
+          pickup_at?: string | null
           reason: string
           requested_by: string
+          restocking_status?: string
           return_awb?: string | null
           shipment_id: string
           status?: string
@@ -684,8 +709,10 @@ export type Database = {
           created_at?: string
           id?: string
           kind?: string
+          pickup_at?: string | null
           reason?: string
           requested_by?: string
+          restocking_status?: string
           return_awb?: string | null
           shipment_id?: string
           status?: string
@@ -701,10 +728,36 @@ export type Database = {
           },
         ]
       }
+      service_rates: {
+        Row: {
+          active: boolean
+          base: number
+          per_kg: number
+          service: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base?: number
+          per_kg?: number
+          service: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base?: number
+          per_kg?: number
+          service?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shipment_pieces: {
         Row: {
+          box_preset: string | null
           contents: string | null
           created_at: string
+          dims: Json | null
           id: string
           piece_code: string
           seq_no: number
@@ -713,8 +766,10 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          box_preset?: string | null
           contents?: string | null
           created_at?: string
+          dims?: Json | null
           id?: string
           piece_code: string
           seq_no: number
@@ -723,8 +778,10 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          box_preset?: string | null
           contents?: string | null
           created_at?: string
+          dims?: Json | null
           id?: string
           piece_code?: string
           seq_no?: number

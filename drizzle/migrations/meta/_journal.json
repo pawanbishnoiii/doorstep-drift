@@ -8,6 +8,13 @@
       "when": 1792558064914,
       "tag": "0000_remix_empty_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792558600839,
+      "tag": "0001_booking_settings_and_parcel_dimensions",
+      "breakpoints": true
     }
   ]
 }
