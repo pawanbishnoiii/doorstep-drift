@@ -69,7 +69,7 @@ function PointPartner() {
       <section className="hero-shell relative bg-hero px-4 pb-16 pt-28 md:px-8 md:pt-40">
         <div className="mx-auto grid max-w-[1240px] items-center gap-12 lg:grid-cols-2">
           <div className="text-center lg:text-left">
-            <span className="hero-rise inline-flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs font-extrabold"><Store className="h-4 w-4 text-primary" /> Get Xpress Point Partner Program</span>
+            <span className="hero-rise inline-flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs font-extrabold"><Store className="h-4 w-4 text-primary" /> Get Xpress Hub Partner Program</span>
             <h1 className="hero-rise mt-6 font-display text-[clamp(2.8rem,7vw,6rem)] font-extrabold leading-[.9] tracking-[-.05em]">Your shop.<br /><span className="text-primary">Our network.</span><br />Shared growth.</h1>
             <p className="hero-rise mx-auto mt-6 max-w-lg text-lg text-muted-foreground lg:mx-0">Kirana, mobile shop, stationery or boutique — turn any counter into a mini hub and earn on every parcel. Zero franchise fee.</p>
             <div className="hero-rise mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">

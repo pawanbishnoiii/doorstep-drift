@@ -18,7 +18,7 @@ export function SiteFooter() {
         </div>
         <div className="space-y-2 text-sm">
           <p className="font-bold">Partner</p>
-          <Link to="/point-partner" className="block opacity-70 hover:opacity-100">Open a Get Xpress Point</Link>
+          <Link to="/point-partner" className="block opacity-70 hover:opacity-100">Open a Get Xpress Hub</Link>
           <Link to="/terms" className="block opacity-70 hover:opacity-100">Terms & Conditions</Link>
           <Link to="/auth" className="block opacity-70 hover:opacity-100">Sign in</Link>
         </div>
