@@ -77,9 +77,7 @@ function Onboarding() {
         </div>
         <Button type="button" variant="outline" className="h-12" onClick={locate} disabled={locating}>{locating ? <Loader2 className="animate-spin" /> : <LocateFixed />} Use my current location</Button>
         {geo && <p className="text-xs text-muted-foreground">Location saved: {geo.lat.toFixed(5)}, {geo.lng.toFixed(5)}</p>}
-        <div className="text-sm font-semibold">Pincode
-          <PinAutocomplete value={f.pincode} onChange={set("pincode")} onPick={(x: { pincode: string; city?: string }) => setF((s) => ({ ...s, pincode: x.pincode, city: x.city ?? s.city }))} />
-        </div>
+        <PinAutocomplete label="Pincode" value={f.pincode} city={f.city} onChange={set("pincode")} onPick={(x) => setF((s) => ({ ...s, pincode: x.pincode, city: x.city ?? s.city }))} />
         <label className="text-sm font-semibold">Address<textarea required rows={3} value={f.address} onChange={(e) => set("address")(e.target.value)} className="mt-1 w-full rounded-xl border bg-card p-4" /></label>
         <Button type="submit" className="h-12" disabled={busy}>{busy && <Loader2 className="animate-spin" />} Save and continue</Button>
       </form>

@@ -24,6 +24,7 @@ import { Route as AuthenticatedConsoleRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedCouponsRouteImport } from './routes/_authenticated/coupons'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedPincodesRouteImport } from './routes/_authenticated/pincodes'
 import { Route as AuthenticatedReturnsRouteImport } from './routes/_authenticated/returns'
@@ -118,6 +119,11 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -221,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/coupons': typeof AuthenticatedCouponsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/orders': typeof AuthenticatedOrdersRoute
   '/pincodes': typeof AuthenticatedPincodesRoute
   '/returns': typeof AuthenticatedReturnsRoute
@@ -253,6 +260,7 @@ export interface FileRoutesByTo {
   '/coupons': typeof AuthenticatedCouponsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/orders': typeof AuthenticatedOrdersRoute
   '/pincodes': typeof AuthenticatedPincodesRoute
   '/returns': typeof AuthenticatedReturnsRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   '/_authenticated/coupons': typeof AuthenticatedCouponsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/pincodes': typeof AuthenticatedPincodesRoute
   '/_authenticated/returns': typeof AuthenticatedReturnsRoute
@@ -321,6 +330,7 @@ export interface FileRouteTypes {
     | '/coupons'
     | '/dashboard'
     | '/notifications'
+    | '/onboarding'
     | '/orders'
     | '/pincodes'
     | '/returns'
@@ -353,6 +363,7 @@ export interface FileRouteTypes {
     | '/coupons'
     | '/dashboard'
     | '/notifications'
+    | '/onboarding'
     | '/orders'
     | '/pincodes'
     | '/returns'
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/_authenticated/coupons'
     | '/_authenticated/dashboard'
     | '/_authenticated/notifications'
+    | '/_authenticated/onboarding'
     | '/_authenticated/orders'
     | '/_authenticated/pincodes'
     | '/_authenticated/returns'
@@ -522,6 +534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/orders': {
       id: '/_authenticated/orders'
       path: '/orders'
@@ -646,6 +665,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCouponsRoute: typeof AuthenticatedCouponsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedPincodesRoute: typeof AuthenticatedPincodesRoute
   AuthenticatedReturnsRoute: typeof AuthenticatedReturnsRoute
@@ -672,6 +692,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCouponsRoute: AuthenticatedCouponsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedPincodesRoute: AuthenticatedPincodesRoute,
   AuthenticatedReturnsRoute: AuthenticatedReturnsRoute,
