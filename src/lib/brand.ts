@@ -1,12 +1,11 @@
 // Central brand config — change name, domain, contacts and public URL here.
-// NOTE: "dropbox.in" is a proposed brand/domain pending ownership and trademark checks.
-// This brand is not affiliated with Dropbox, Inc.
+// Domain is the intended brand address; QR URLs use the active app origin until configured.
 export const brand = {
-  name: "DropBox",
-  domain: "dropbox.in",
-  tagline: "Drop it. We'll box the distance.",
+  name: "Get Xpress",
+  domain: "getxpress.in",
+  tagline: "Every parcel. Moving forward.",
   supportPhone: "+91 00000 00000",
-  supportEmail: "care@dropbox.in",
+  supportEmail: "care@getxpress.in",
 };
 
 /** Public base URL used in labels/QR codes. Set VITE_PUBLIC_BASE_URL once the final domain is live. */
@@ -14,5 +13,5 @@ export function publicBaseUrl() {
   const env = import.meta.env["VITE_PUBLIC_BASE_URL"] as string | undefined;
   if (env) return env.replace(/\/$/, "");
   if (typeof window !== "undefined") return window.location.origin;
-  return "https://dropboxx.lovable.app";
+  return "https://getxpress.in";
 }

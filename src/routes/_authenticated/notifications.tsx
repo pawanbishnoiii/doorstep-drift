@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/hooks/use-roles";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
-  head: () => ({ meta: [{ title: "Notifications — DropBox" }, { name: "description", content: "Shipment updates and application notifications." }, { property: "og:title", content: "Notifications — DropBox" }, { property: "og:description", content: "Shipment updates and application notifications." }] }),
+  head: () => ({ meta: [{ title: "Notifications — Get Xpress" }, { name: "description", content: "Shipment updates and application notifications." }, { property: "og:title", content: "Notifications — Get Xpress" }, { property: "og:description", content: "Shipment updates and application notifications." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Notifications,
 });
 

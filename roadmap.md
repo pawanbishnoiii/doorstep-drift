@@ -1,12 +1,10 @@
-# Roadmap
-- [x] Landing + Point Partner pages, branded images, auth (Google + email), OTP (on-screen dev), booking, tracking, health check cron
-- [x] P0: role hierarchy (Admin→State Director→State Manager→Area Manager→Point, Network separate) with server-side enforcement
-- [x] P0: pincode master (24,241 rows) + allocation engine with conflict checks, history, release, audit
-- [x] P0: master AWB + per-parcel piece IDs from server sequence
-- [x] P0: Code 128 + QR labels, 4×6 thermal & A4 PDF, print logging, reprint reasons, blocked for unpaid/cancelled
-- [x] P0: staff scan page (camera + manual), piece-level tracking events, public tracking by AWB or piece ID
-- [x] Pincode autosuggest in booking, Excel export, staff console, terms page
-- [ ] Bootstrap first admin (needs the owner's email; then grant admin role)
-- [ ] Razorpay online payments (needs API keys) — booking flow already supports awaiting_payment state
-- [ ] Real SMS OTP (needs MSG91/Fast2SMS)
-- [ ] P1: bag/seal/manifests, commissions, notifications
+# Get Xpress upgrade
+- [ ] Google Maps renderer and authenticated suggestions; keyless fallback.
+- [ ] Get Xpress name, logos, favicon, domain references and upgraded landing page.
+- [ ] Public booking, persistent guest drafts, login/OTP continuation at confirmation.
+- [ ] Per-parcel presets/custom dimensions, service comparison and coupon preview.
+- [ ] Admin service rates, pay-at-pickup toggle and pincode master management.
+- [ ] Returns/RTO, bags/manifests and commission pages using existing scoped records.
+- [ ] Professional dashboard navigation and end-to-end checks.
+- [ ] App email sending — blocked until an owned sender domain is configured.
+- [ ] Real online payments and SMS — blocked on provider credentials; retain clearly labelled demo/on-screen OTP.

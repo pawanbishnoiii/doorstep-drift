@@ -6,7 +6,7 @@ import { AppShell } from "@/components/site/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/scan")({
-  head: () => ({ meta: [{ title: "Scan parcel — DropBox" }, { name: "description", content: "Scan a parcel barcode or QR to update its status." }] }),
+  head: () => ({ meta: [{ title: "Scan parcel — Get Xpress" }, { name: "description", content: "Scan a parcel barcode or QR to update its status." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Scan,
 });
 

@@ -10,7 +10,7 @@ export const Route = createFileRoute("/terms")({
       { name: "description", content: `Terms and conditions for using ${brand.name} courier services.` },
       { property: "og:title", content: `Terms & Conditions — ${brand.name}` },
       { property: "og:description", content: `Terms and conditions for using ${brand.name} courier services.` },
-    ],
+    , { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }],
   }),
   component: Terms,
 });
@@ -23,9 +23,9 @@ const sections: [string, string][] = [
   ["5. Delivery", "Delivery timelines are estimates, not guarantees. Undeliverable parcels (wrong address, refusal) may be returned to the sender at the sender's cost."],
   ["6. Tracking & labels", "Each parcel carries a unique piece ID with a Code 128 barcode and QR code. Cancelled or voided label IDs are never reused. Sharing tracking IDs is at the sender's discretion."],
   ["7. Payments & refunds", "Online payments are processed by our payment partner. Refunds for cancelled bookings are issued to the original payment method within 7 working days. Pay-at-pickup amounts are collected by the rider."],
-  ["8. Points & partners", "DropBox Points and Mini Hubs operate under a separate partner agreement. Points may only accept shipments for pincodes allocated to them."],
+  ["8. Points & partners", "Get Xpress Points and Mini Hubs operate under a separate partner agreement. Points may only accept shipments for pincodes allocated to them."],
   ["9. Privacy", "We collect sender/receiver details solely to fulfil deliveries and comply with law. We do not sell personal data."],
-  ["10. Brand notice", `${brand.domain} is a proposed brand/domain pending ownership and trademark verification. This service is not affiliated with Dropbox, Inc.`],
+  ["10. Brand notice", `${brand.domain} is a proposed brand/domain pending ownership and trademark verification. Brand registration and legal office details are pending confirmation.`],
   ["11. Jurisdiction", "These terms are governed by the laws of India. Courts at our registered office have exclusive jurisdiction."],
 ];
 

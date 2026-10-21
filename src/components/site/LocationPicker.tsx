@@ -2,14 +2,24 @@ import { ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useRef, useState } from "react";
 import { Crosshair, Loader2, MapPin, Search } from "lucide-react";
 import { reverseGeocode, searchPlaces, type GeoHit } from "@/lib/geo";
+import { useServerFn } from "@tanstack/react-start";
+import { googlePlaceSearch, googleReverse } from "@/lib/maps.functions";
+import { useSession } from "@/hooks/use-session";
+import { Button } from "@/components/ui/button";
 
 const LeafletMap = lazy(() => import("./LeafletMap"));
+const GoogleMap = lazy(() => import("./GoogleMap"));
 
 /**
  * Address search with OpenStreetMap suggestions, a draggable map pin and "use my location".
  * Calls onResolve with real coordinates + postcode/city from OSM; the caller validates the pincode against our master list.
  */
 export function LocationPicker({ point, onResolve }: { point: { lat: number; lng: number } | null; onResolve: (hit: GeoHit) => void }) {
+  const { user } = useSession();
+  const googleSearch = useServerFn(googlePlaceSearch);
+  const googlePick = useServerFn(googleReverse);
+  const [fallback, setFallback] = useState(false);
+  const sequence = useRef(0);
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<GeoHit[]>([]);
   const [busy, setBusy] = useState(false);
@@ -20,9 +30,10 @@ export function LocationPicker({ point, onResolve }: { point: { lat: number; lng
     setQ(v);
     clearTimeout(t.current);
     if (v.trim().length < 3) return setHits([]);
-    t.current = setTimeout(async () => { setBusy(true); try { setHits(await searchPlaces(v)); } catch { setHits([]); } setBusy(false); }, 450);
+    const id = ++sequence.current;
+    t.current = setTimeout(async () => { setBusy(true); try { const rows = user ? await googleSearch({ data: { q: v } }).catch(() => searchPlaces(v)) : await searchPlaces(v); if(id === sequence.current) setHits(rows); } catch { if(id === sequence.current) setHits([]); } if(id === sequence.current) setBusy(false); }, 350);
   };
-  const pick = async (lat: number, lng: number) => { setBusy(true); const h = await reverseGeocode(lat, lng).catch(() => null); setBusy(false); onResolve(h ?? { lat, lng, label: `${lat.toFixed(5)}, ${lng.toFixed(5)}` }); };
+  const pick = async (lat: number, lng: number) => { setBusy(true); const h = await (user ? googlePick({ data: { lat, lng } }).catch(() => reverseGeocode(lat,lng)) : reverseGeocode(lat, lng)).catch(() => null); setBusy(false); onResolve(h ?? { lat, lng, label: `${lat.toFixed(5)}, ${lng.toFixed(5)}` }); };
   const locate = () => {
     if (!navigator.geolocation) return;
     setBusy(true);
@@ -30,7 +41,7 @@ export function LocationPicker({ point, onResolve }: { point: { lat: number; lng
   };
 
   return (
-    <div className="rounded-2xl border bg-card p-3">
+    <div className="rounded-lg border bg-card p-3">
       <div className="flex gap-2">
         <label className="relative flex h-11 flex-1 items-center gap-2 rounded-xl border bg-background px-3">
           <Search className="h-4 w-4 text-muted-foreground" />
@@ -46,17 +57,17 @@ export function LocationPicker({ point, onResolve }: { point: { lat: number; lng
             </div>
           )}
         </label>
-        <button type="button" onClick={locate} aria-label="Use my location" className="grid h-11 w-11 place-items-center rounded-xl bg-ink text-ink-foreground"><Crosshair className="h-4 w-4" /></button>
-        <button type="button" onClick={() => setOpen(!open)} className="h-11 rounded-xl border px-3 text-xs font-bold">{open ? "Hide map" : "Map"}</button>
+        <Button type="button" size="icon" onClick={locate} aria-label="Use my location" className="h-11 w-11"><Crosshair /></Button>
+        <Button type="button" variant="outline" onClick={() => setOpen(!open)} className="h-11">{open ? "Hide map" : "Map"}</Button>
       </div>
       {open && (
         <div className="mt-3">
           <ClientOnly fallback={<div className="h-64 animate-pulse rounded-2xl bg-muted" />}>
             <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-muted" />}>
-              <LeafletMap lat={point?.lat ?? 26.9124} lng={point?.lng ?? 75.7873} onPick={pick} />
+              {fallback ? <LeafletMap lat={point?.lat ?? 26.9124} lng={point?.lng ?? 75.7873} onPick={pick} /> : <GoogleMap lat={point?.lat ?? 26.9124} lng={point?.lng ?? 75.7873} onPick={pick} onError={() => setFallback(true)} />}
             </Suspense>
           </ClientOnly>
-          <p className="mt-1 text-[11px] text-muted-foreground">Tap the map or drag the pin. Map data © OpenStreetMap contributors.</p>
+          <div className="mt-1 flex items-center justify-between"><span className="text-[11px] text-muted-foreground">{fallback ? "© OpenStreetMap contributors" : "Google Maps"}</span><Button size="sm" variant="ghost" onClick={() => setFallback(!fallback)}>{fallback ? "Google Maps" : "OpenStreetMap"}</Button></div>
         </div>
       )}
     </div>

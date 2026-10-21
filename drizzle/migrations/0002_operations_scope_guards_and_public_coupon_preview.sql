@@ -1,0 +1,21 @@
+GRANT SELECT(code,discount_type,discount_value,max_discount,min_order,active,starts_at,expires_at,max_uses,used_count) ON public.coupons TO anon;
+CREATE POLICY "guest active coupon preview" ON public.coupons FOR SELECT TO anon USING(active);
+CREATE OR REPLACE FUNCTION public.can_access_bag(_bag uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM public.bags b WHERE b.id=_bag AND (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'network') OR b.created_by=auth.uid())) $$;
+GRANT EXECUTE ON FUNCTION public.can_access_bag(uuid) TO authenticated;
+DROP POLICY "staff read bags" ON public.bags;
+CREATE POLICY "scoped bags read" ON public.bags FOR SELECT TO authenticated USING(public.can_access_bag(id));
+DROP POLICY "staff read bag items" ON public.bag_items;
+CREATE POLICY "scoped bag items read" ON public.bag_items FOR SELECT TO authenticated USING(public.can_access_bag(bag_id));
+DROP POLICY "staff read manifests" ON public.manifests;
+CREATE POLICY "scoped manifests read" ON public.manifests FOR SELECT TO authenticated USING(public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'network') OR created_by=auth.uid() OR received_by=auth.uid());
+DO $$ DECLARE def text; BEGIN
+SELECT pg_get_functiondef('public.add_piece_to_bag(uuid,text)'::regprocedure) INTO def;
+def:=replace(def,'IF b.status <>','IF NOT public.can_access_bag(_bag_id) THEN RAISE EXCEPTION ''Bag outside your scope''; END IF; IF b.status <>');
+def:=replace(def,'IF s.status IN','IF NOT (public.has_role(caller,''admin'') OR public.has_role(caller,''network'') OR public.can_access_pincode(caller,s.sender_pincode) OR public.can_access_pincode(caller,s.receiver_pincode)) THEN RAISE EXCEPTION ''Parcel outside your scope''; END IF; IF s.status IN'); EXECUTE def;
+SELECT pg_get_functiondef('public.seal_bag(uuid,text)'::regprocedure) INTO def; def:=replace(def,'IF length(trim','IF NOT public.can_access_bag(_bag_id) THEN RAISE EXCEPTION ''Bag outside your scope''; END IF; IF length(trim'); EXECUTE def;
+SELECT pg_get_functiondef('public.create_manifest(text,text,text,uuid[])'::regprocedure) INTO def; def:=replace(def,'SELECT count(*) INTO n','IF EXISTS(SELECT 1 FROM unnest(_bag_ids) x WHERE NOT public.can_access_bag(x)) THEN RAISE EXCEPTION ''Bag outside your scope''; END IF; SELECT count(*) INTO n'); EXECUTE def;
+SELECT pg_get_functiondef('public.receive_manifest(uuid)'::regprocedure) INTO def; def:=replace(def,'UPDATE public.manifests SET','IF NOT (public.has_role(caller,''admin'') OR public.has_role(caller,''network'') OR m.created_by=caller OR m.received_by=caller) THEN RAISE EXCEPTION ''Manifest outside your scope''; END IF; UPDATE public.manifests SET'); EXECUTE def;
+SELECT pg_get_functiondef('public.scan_piece(text,text,text,text)'::regprocedure) INTO def; def:=replace(def,'INSERT INTO public.tracking_events','IF NOT (public.has_role(caller,''admin'') OR public.has_role(caller,''network'') OR public.can_access_pincode(caller,s.sender_pincode) OR public.can_access_pincode(caller,s.receiver_pincode)) THEN RAISE EXCEPTION ''Parcel outside your scope''; END IF; IF _status NOT IN (''picked_up'',''in_transit'',''at_hub'',''out_for_delivery'',''delivered'',''exception'') THEN RAISE EXCEPTION ''Invalid scan status''; END IF; INSERT INTO public.tracking_events'); EXECUTE def;
+END $$;
+GRANT UPDATE(pickup_at,restocking_status) ON public.returns TO authenticated;
+CREATE POLICY "staff scoped return details" ON public.returns FOR UPDATE TO authenticated USING(public.is_staff(auth.uid()) AND EXISTS(SELECT 1 FROM public.shipments s WHERE s.id=shipment_id AND (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'network') OR public.can_access_pincode(auth.uid(),s.sender_pincode) OR public.can_access_pincode(auth.uid(),s.receiver_pincode))));

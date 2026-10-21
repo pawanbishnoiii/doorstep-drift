@@ -28,7 +28,7 @@ export async function lookupPins(raw: string): Promise<PinHit[]> {
   // Locality names (e.g. "Malviya Nagar") are not in the master list — ask the free map for them
   if (!isPin && rows.length < 4 && q.length >= 3) {
     const places = await searchPlaces(q).catch(() => []);
-    rows = rows.concat(places.filter((p) => p.pincode && /^\d{6}$/.test(p.pincode)).map((p) => ({ pincode: p.pincode!, city: p.city ?? "", state: p.state ?? "", source: "map" as const, lat: p.lat, lng: p.lng, label: p.label })));
+    rows = rows.concat(places.flatMap((p) => p.pincode && /^\d{6}$/.test(p.pincode) ? [{ pincode: p.pincode, city: p.city ?? "", state: p.state ?? "", source: "map" as const, lat: p.lat, lng: p.lng, label: p.label }] : []));
   }
   cache.set(key, rows);
   return rows;

@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { demoPay } from "@/lib/shipments.functions";
 
 export const Route = createFileRoute("/_authenticated/pay/$shipmentId")({
-  head: () => ({ meta: [{ title: "Pay for shipment — DropBox" }, { name: "description", content: "Complete payment for your DropBox booking." }, { property: "og:title", content: "Pay — DropBox" }, { property: "og:description", content: "Complete payment for your DropBox booking." }] }),
+  head: () => ({ meta: [{ title: "Pay for shipment — Get Xpress" }, { name: "description", content: "Complete payment for your Get Xpress booking." }, { property: "og:title", content: "Pay — Get Xpress" }, { property: "og:description", content: "Complete payment for your Get Xpress booking." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Pay,
 });
 

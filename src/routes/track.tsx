@@ -12,11 +12,11 @@ export const Route = createFileRoute("/track")({
   validateSearch: (s) => z.object({ id: z.coerce.string().max(30).optional() }).parse(s),
   head: () => ({
     meta: [
-      { title: "Track your parcel — DropBox" },
-      { name: "description", content: "Enter your DropBox tracking ID to see live shipment status." },
-      { property: "og:title", content: "Track your DropBox parcel" },
+      { title: "Track your parcel — Get Xpress" },
+      { name: "description", content: "Enter your Get Xpress tracking ID to see live shipment status." },
+      { property: "og:title", content: "Track your Get Xpress parcel" },
       { property: "og:description", content: "Live shipment status and scan history." },
-    ],
+    , { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }],
   }),
   component: Track,
 });
@@ -32,7 +32,7 @@ function Track() {
     enabled: !!id,
     refetchInterval: (q) => (q.state.data && (q.state.data as NonNullable<Result>).status !== "delivered" ? 15000 : false),
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("track_shipment", { _tracking: id! });
+      const { data, error } = await supabase.rpc("track_shipment", { _tracking: id ?? "" });
       if (error) throw error;
       return data as Result;
     },

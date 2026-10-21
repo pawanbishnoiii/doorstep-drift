@@ -20,11 +20,11 @@ import upDoor from "@/assets/up-doorstep-delivery.jpg.asset.json";
 export const Route = createFileRoute("/point-partner")({
   head: () => ({
     meta: [
-      { title: "Become a DropBox Point — Earn from your shop | dropbox.in" },
-      { name: "description", content: "Turn your shop into a DropBox Point. Earn commission on every parcel booked, received and handed over. Zero franchise fee." },
-      { property: "og:title", content: "Become a DropBox Point partner" },
+      { title: "Become a Get Xpress Point — Earn from your shop | getxpress.in" },
+      { name: "description", content: "Turn your shop into a Get Xpress Point. Earn commission on every parcel booked, received and handed over. Zero franchise fee." },
+      { property: "og:title", content: "Become a Get Xpress Point partner" },
       { property: "og:description", content: "Earn on every parcel from your counter. Apply in 3 minutes." },
-    ],
+    , { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }],
   }),
   component: PointPartner,
 });
@@ -69,7 +69,7 @@ function PointPartner() {
       <section className="hero-shell relative bg-hero px-4 pb-16 pt-28 md:px-8 md:pt-40">
         <div className="mx-auto grid max-w-[1240px] items-center gap-12 lg:grid-cols-2">
           <div className="text-center lg:text-left">
-            <span className="hero-rise inline-flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs font-extrabold"><Store className="h-4 w-4 text-primary" /> DropBox Point Partner Program</span>
+            <span className="hero-rise inline-flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs font-extrabold"><Store className="h-4 w-4 text-primary" /> Get Xpress Point Partner Program</span>
             <h1 className="hero-rise mt-6 font-display text-[clamp(2.8rem,7vw,6rem)] font-extrabold leading-[.9] tracking-[-.05em]">Your shop.<br /><span className="text-primary">Our network.</span><br />Shared growth.</h1>
             <p className="hero-rise mx-auto mt-6 max-w-lg text-lg text-muted-foreground lg:mx-0">Kirana, mobile shop, stationery or boutique — turn any counter into a mini hub and earn on every parcel. Zero franchise fee.</p>
             <div className="hero-rise mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
@@ -79,9 +79,9 @@ function PointPartner() {
           </div>
           <div className="hero-art relative">
             <div className="grid grid-cols-2 gap-3">
-              <img src={hubPartner} alt="DropBox Point partner at her counter" className="row-span-2 h-full rounded-[32px] object-cover shadow-soft" />
-              <img src={upManager.url} alt="DropBox hub manager" loading="lazy" className="aspect-square rounded-[28px] object-cover shadow-soft" />
-              <img src={upCourier.url} alt="DropBox courier" loading="lazy" className="aspect-square rounded-[28px] object-cover shadow-soft" />
+              <img src={hubPartner} alt="Get Xpress Point partner at her counter" className="row-span-2 h-full rounded-[32px] object-cover shadow-soft" />
+              <img src={upManager.url} alt="Get Xpress hub manager" loading="lazy" className="aspect-square rounded-[28px] object-cover shadow-soft" />
+              <img src={upCourier.url} alt="Get Xpress courier" loading="lazy" className="aspect-square rounded-[28px] object-cover shadow-soft" />
             </div>
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -bottom-6 left-6 flex items-center gap-3 rounded-2xl bg-card p-3 pr-5 shadow-soft">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-lime"><TrendingUp className="h-5 w-5" /></span>
@@ -120,7 +120,7 @@ function PointPartner() {
 
       <section className="timeline-shell px-4 pb-24 md:px-8">
         <div className="mx-auto grid max-w-[1240px] items-center gap-12 lg:grid-cols-2">
-          <img src={hubTeam} alt="DropBox Point team" loading="lazy" className="reveal rounded-[36px] object-cover shadow-soft" />
+          <img src={hubTeam} alt="Get Xpress Point team" loading="lazy" className="reveal rounded-[36px] object-cover shadow-soft" />
           <div>
             <h2 className="reveal font-display text-4xl font-extrabold md:text-5xl">Live in 4 simple steps</h2>
             <div className="mt-8 space-y-3">
@@ -138,7 +138,7 @@ function PointPartner() {
       <section className="px-4 pb-10 md:px-8">
         <div className="mx-auto flex max-w-[1240px] gap-3 overflow-x-auto pb-2">
           {[upSeller.url, upDoor.url, upManager.url, upCourier.url].map((src, i) => (
-            <img key={i} src={src} alt="DropBox in action" loading="lazy" className="reveal h-64 w-72 shrink-0 rounded-[28px] object-cover" />
+            <img key={i} src={src} alt="Get Xpress in action" loading="lazy" className="reveal h-64 w-72 shrink-0 rounded-[28px] object-cover" />
           ))}
         </div>
       </section>

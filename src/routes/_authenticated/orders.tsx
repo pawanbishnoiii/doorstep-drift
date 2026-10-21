@@ -10,7 +10,7 @@ import { useRoles } from "@/hooks/use-roles";
 import { switchToCashOnPickup } from "@/lib/shipments.functions";
 
 export const Route = createFileRoute("/_authenticated/orders")({
-  head: () => ({ meta: [{ title: "Orders — DropBox" }, { name: "description", content: "All your DropBox orders with filters and export." }, { property: "og:title", content: "Orders — DropBox" }, { property: "og:description", content: "All your DropBox orders with filters and export." }] }),
+  head: () => ({ meta: [{ title: "Orders — Get Xpress" }, { name: "description", content: "All your Get Xpress orders with filters and export." }, { property: "og:title", content: "Orders — Get Xpress" }, { property: "og:description", content: "All your Get Xpress orders with filters and export." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Orders,
 });
 
@@ -28,7 +28,8 @@ function Orders() {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       let query = supabase.from("shipments").select("id,tracking_number,status,sender_name,sender_city,sender_pincode,receiver_name,receiver_city,receiver_pincode,price,discount,coupon_code,created_at,service,pieces_count,payment_method,payment_status").order("created_at", { ascending: false }).limit(500);
-      if (scope === "mine") query = query.eq("user_id", u.user!.id);
+      if (!u.user) throw new Error("Sign in to view orders.");
+      if (scope === "mine") query = query.eq("user_id", u.user.id);
       const { data, error } = await query;
       if (error) throw error;
       return data;
@@ -44,7 +45,7 @@ function Orders() {
   const exportXlsx = async () => {
     const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(list.map((r) => ({ awb: r.tracking_number, status: r.status, from: `${r.sender_city} ${r.sender_pincode}`, to: `${r.receiver_name}, ${r.receiver_city} ${r.receiver_pincode}`, parcels: r.pieces_count, service: r.service, payment: r.payment_method, payment_status: r.payment_status, coupon: r.coupon_code ?? "", discount: r.discount, price: r.price, booked: r.created_at })));
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "orders"); XLSX.writeFile(wb, "dropbox-orders.xlsx");
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "orders"); XLSX.writeFile(wb, "getxpress-orders.xlsx");
   };
 
   return (
@@ -60,7 +61,7 @@ function Orders() {
       </div>
       <label className="mt-4 flex h-11 items-center gap-2 rounded-xl border bg-card px-3"><Search className="h-4 w-4 text-muted-foreground" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search AWB, name, city, pincode" className="flex-1 bg-transparent text-sm font-semibold outline-none" /></label>
 
-      <div className="mt-4 hidden overflow-hidden rounded-2xl border bg-card lg:block">
+      <div className="mt-4 hidden overflow-hidden rounded-lg border bg-card lg:block">
         <table className="w-full text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-wider text-muted-foreground"><tr><th className="p-3">Order / AWB</th><th>Route</th><th>Parcels</th><th>Payment</th><th>Status</th><th className="text-right">Amount</th><th className="p-3 text-right">Actions</th></tr></thead>
           <tbody>
@@ -82,14 +83,14 @@ function Orders() {
 
       <div className="mt-4 space-y-2 lg:hidden">
         {list.map((s) => (
-          <div key={s.id} className="rounded-2xl border bg-card p-4">
+          <div key={s.id} className="rounded-lg border bg-card p-4">
             <div className="flex justify-between"><Link to="/track" search={{ id: s.tracking_number }} className="font-mono text-sm font-bold text-primary">{s.tracking_number}</Link><span className="rounded-full bg-cream px-2.5 py-0.5 text-xs font-bold capitalize">{s.status.replaceAll("_", " ")}</span></div>
             <p className="mt-1 font-bold">{s.sender_city} → {s.receiver_city}</p>
             <p className="text-xs text-muted-foreground">{s.pieces_count} parcel · ₹{s.price}</p>
             <div className="mt-3"><Actions s={s} onCash={async () => { try { await toCash({ data: { awb: s.tracking_number } }); qc.invalidateQueries({ queryKey: ["orders"] }); } catch (e) { toast.error((e as Error).message); } }} /></div>
           </div>
         ))}
-        {!isLoading && list.length === 0 && <p className="rounded-2xl border border-dashed p-8 text-center text-muted-foreground">No orders here.</p>}
+        {!isLoading && list.length === 0 && <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">No orders here.</p>}
       </div>
     </AppShell>
   );

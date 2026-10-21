@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { couponDiscount, quote } from "./pricing";
+import { couponDiscount, quote, serviceAllowed, type ServiceLevel, type ServiceRates } from "./pricing";
 
 const party = {
   name: z.string().trim().min(2).max(100),
@@ -15,7 +15,7 @@ const input = z.object({
   service: z.enum(["standard", "express", "same_day"]),
   sender: z.object(party),
   receiver: z.object(party),
-  pieces: z.array(z.object({ weight_kg: z.number().min(0.05).max(100) })).min(1).max(50),
+  pieces: z.array(z.object({ weight_kg: z.number().min(0.05).max(100), dims: z.object({l:z.number().min(1).max(300),w:z.number().min(1).max(300),h:z.number().min(1).max(300)}).optional(), box_preset:z.string().max(40).optional() })).min(1).max(50),
   contents: z.string().trim().max(200).optional(),
   declared_value: z.number().min(0).max(1_000_000).default(0),
   payment_method: z.enum(["cash_on_pickup", "online"]).default("cash_on_pickup"),
@@ -61,8 +61,13 @@ export const createShipment = createServerFn({ method: "POST" })
     if (!from?.active) throw new Error(`Pickup pincode ${data.sender.pincode} is not serviceable yet.`);
     if (!to?.active) throw new Error(`Delivery pincode ${data.receiver.pincode} is not serviceable yet.`);
 
+    const [{data:rateRows,error:rateError},{data:settings,error:settingsError}] = await Promise.all([sb.from("service_rates").select("*"),sb.from("app_settings").select("cash_on_pickup").eq("id",true).single()]);
+    if(rateError || settingsError) throw new Error("Delivery settings could not be loaded.");
+    const rates:ServiceRates={}; for(const r of rateRows??[]) rates[r.service as ServiceLevel]={base:Number(r.base),perKg:Number(r.per_kg),active:r.active};
+    if(!serviceAllowed(data.service,from.city,to.city,rates)) throw new Error("This service is unavailable for the selected cities.");
+    if(data.payment_method==="cash_on_pickup" && !settings?.cash_on_pickup) throw new Error("Pay at pickup is currently disabled.");
     const totalKg = data.pieces.reduce((a, p) => a + p.weight_kg, 0);
-    const q = quote({ fromPin: data.sender.pincode, toPin: data.receiver.pincode, weightKg: totalKg, service: data.service, dims: data.dims });
+    const q = quote({ fromPin: data.sender.pincode, toPin: data.receiver.pincode, weightKg: totalKg, service: data.service, pieces:data.pieces.map(p=>({...p,dims:p.dims??data.dims})), rates });
     const cp = data.coupon_code ? await resolveCoupon(data.coupon_code, context.userId, q.total) : null;
     const payable = Math.round((q.total - (cp?.discount ?? 0)) * 100) / 100;
 
@@ -82,8 +87,8 @@ export const createShipment = createServerFn({ method: "POST" })
       tracking_number: awb,
       user_id: context.userId,
       service: data.service,
-      sender_name: data.sender.name, sender_phone: data.sender.phone, sender_address: data.sender.address, sender_pincode: data.sender.pincode, sender_city: data.sender.city,
-      receiver_name: data.receiver.name, receiver_phone: data.receiver.phone, receiver_address: data.receiver.address, receiver_pincode: data.receiver.pincode, receiver_city: data.receiver.city,
+      sender_name: data.sender.name, sender_phone: data.sender.phone, sender_address: data.sender.address, sender_pincode: data.sender.pincode, sender_city: from.city,
+      receiver_name: data.receiver.name, receiver_phone: data.receiver.phone, receiver_address: data.receiver.address, receiver_pincode: data.receiver.pincode, receiver_city: to.city,
       weight_kg: q.weight, contents: data.contents ?? null, declared_value: data.declared_value, price: payable,
       coupon_code: cp?.coupon.code ?? null, discount: cp?.discount ?? 0,
       pickup_lat: data.pickup?.lat ?? null, pickup_lng: data.pickup?.lng ?? null, dims: data.dims ?? null,
@@ -104,7 +109,7 @@ export const createShipment = createServerFn({ method: "POST" })
     for (const [i, p] of data.pieces.entries()) {
       const { data: code } = await sb.rpc("next_piece_code");
       if (!code) throw new Error("Could not allocate piece ID.");
-      pieceRows.push({ shipment_id: row.id, piece_code: code, seq_no: i + 1, total: data.pieces.length, weight_kg: p.weight_kg, contents: data.contents ?? null });
+      pieceRows.push({ shipment_id: row.id, piece_code: code, seq_no: i + 1, total: data.pieces.length, weight_kg: p.weight_kg, contents: data.contents ?? null, dims:p.dims??data.dims??null,box_preset:p.box_preset??null });
     }
     const { error: pErr } = await sb.from("shipment_pieces").insert(pieceRows);
     if (pErr) throw new Error(pErr.message);
@@ -117,6 +122,8 @@ export const switchToCashOnPickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { awb: string }) => z.object({ awb: z.string().max(20) }).parse(d))
   .handler(async ({ data, context }) => {
+    const {data:settings,error:settingsError}=await context.supabase.from("app_settings").select("cash_on_pickup").eq("id",true).single();
+    if(settingsError||!settings.cash_on_pickup) throw new Error("Pay at pickup is currently disabled.");
     const { data: s } = await context.supabase.from("shipments").select("id,status,user_id").eq("tracking_number", data.awb).maybeSingle();
     if (!s || s.user_id !== context.userId) throw new Error("Shipment not found.");
     if (s.status !== "awaiting_payment") throw new Error("This booking is already confirmed.");

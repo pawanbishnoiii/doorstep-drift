@@ -9,7 +9,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { ROLE_LABEL, useRoles } from "@/hooks/use-roles";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — DropBox" }, { name: "description", content: "Your DropBox shipping dashboard." }, { property: "og:title", content: "Dashboard — DropBox" }, { property: "og:description", content: "Your DropBox shipping dashboard." }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Get Xpress" }, { name: "description", content: "Your Get Xpress shipping dashboard." }, { property: "og:title", content: "Dashboard — Get Xpress" }, { property: "og:description", content: "Your Get Xpress shipping dashboard." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Dashboard,
 });
 
@@ -24,7 +24,7 @@ function Dashboard() {
   const { data: noAdmin } = useQuery({ queryKey: ["admin-exists"], queryFn: async () => !(await supabase.rpc("admin_exists")).data });
   const { data: mine = [] } = useQuery({
     queryKey: ["my-shipments"], enabled: !!me?.user,
-    queryFn: async () => (await supabase.from("shipments").select("id,tracking_number,status,price,created_at,sender_city,receiver_city").eq("user_id", me!.user.id).order("created_at", { ascending: false }).limit(5)).data ?? [],
+    queryFn: async () => (await supabase.from("shipments").select("id,tracking_number,status,price,created_at,sender_city,receiver_city").eq("user_id", me?.user.id ?? "").order("created_at", { ascending: false }).limit(5)).data ?? [],
   });
   const { data: sum } = useQuery({ queryKey: ["summary"], enabled: isStaff, queryFn: async () => (await supabase.rpc("dashboard_summary")).data as unknown as Summary });
 
@@ -38,23 +38,23 @@ function Dashboard() {
 
   return (
     <AppShell wide>
-      <PageHeader title={`Hi ${name} 👋`} sub={primary ? `${ROLE_LABEL[primary]} dashboard — data limited to your assigned scope.` : "What are we sending today?"}
+      <PageHeader title={primary ? `${ROLE_LABEL[primary]} workspace` : `Welcome, ${name}`} sub={primary ? `${ROLE_LABEL[primary]} dashboard — data limited to your assigned scope.` : "What are we sending today?"}
         action={<div className="flex flex-wrap gap-1.5">{roles.map((r) => <span key={r} className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{ROLE_LABEL[r]}</span>)}</div>} />
 
       {noAdmin && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl border-2 border-dashed border-primary bg-primary/5 p-5">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-dashed border-primary bg-primary/5 p-5">
           <div className="flex items-center gap-3"><Crown className="h-8 w-8 text-primary" /><div><p className="font-bold">No Admin has been set up yet</p><p className="text-sm text-muted-foreground">The first signed-in owner can claim Admin once. After that this option disappears for everyone.</p></div></div>
           <button onClick={claim} className="rounded-2xl bg-primary px-5 py-3 font-bold text-primary-foreground">Make me Admin</button>
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Link to="/ship" className="rounded-[28px] bg-primary p-5 text-primary-foreground shadow-glow"><PackagePlus className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Add order</p></Link>
-        <Link to="/track" className="rounded-[28px] bg-lime p-5 text-ink"><PackageSearch className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Track parcel</p></Link>
+        <Link to="/ship" className="rounded-lg bg-primary p-5 text-primary-foreground shadow-glow"><PackagePlus className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Add order</p></Link>
+        <Link to="/track" className="rounded-lg bg-lime p-5 text-ink"><PackageSearch className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Track parcel</p></Link>
         {isStaff ? <>
-          <Link to="/scan" className="rounded-[28px] bg-ink p-5 text-ink-foreground"><ScanLine className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Scan parcel</p></Link>
-          <Link to="/console" className="rounded-[28px] border bg-card p-5"><ShieldCheck className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Pincodes & staff</p></Link>
-        </> : <Link to="/point-partner" className="col-span-2 rounded-[28px] border bg-card p-5 md:col-span-2"><Store className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Become a DropBox Point</p></Link>}
+          <Link to="/scan" className="rounded-lg bg-ink p-5 text-ink-foreground"><ScanLine className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Scan parcel</p></Link>
+          <Link to="/console" className="rounded-lg border bg-card p-5"><ShieldCheck className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Pincodes & staff</p></Link>
+        </> : <Link to="/point-partner" className="col-span-2 rounded-lg border bg-card p-5 md:col-span-2"><Store className="h-7 w-7" /><p className="mt-6 font-display text-xl font-extrabold">Become a Get Xpress Point</p></Link>}
       </div>
 
       {isStaff && sum && (
@@ -70,7 +70,7 @@ function Dashboard() {
             {isAdmin && <Stat label="Registered users" value={sum.users} />}
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
-            <div className="rounded-3xl border bg-card p-5">
+            <div className="rounded-lg border bg-card p-5">
               <p className="font-bold">Bookings — last 7 days</p>
               <div className="mt-4 flex h-36 items-end gap-2">
                 {sum.last7.map((x) => (
@@ -82,7 +82,7 @@ function Dashboard() {
                 ))}
               </div>
             </div>
-            <div className="rounded-3xl border bg-card p-5">
+            <div className="rounded-lg border bg-card p-5">
               <p className="font-bold">By status</p>
               <div className="mt-3 space-y-2">
                 {Object.entries(sum.by_status).map(([k, v]) => (
@@ -105,7 +105,7 @@ function Dashboard() {
         <Link to="/orders" className="text-sm font-bold text-primary">View all →</Link>
       </div>
       <div className="mt-4 space-y-2">
-        {mine.length === 0 && <p className="rounded-3xl border border-dashed p-8 text-center text-muted-foreground">No orders yet — add your first order.</p>}
+        {mine.length === 0 && <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">No orders yet — add your first order.</p>}
         {mine.map((s) => (
           <Link key={s.id} to="/track" search={{ id: s.tracking_number }} className="flex items-center justify-between rounded-2xl border bg-card p-4">
             <div><p className="font-bold">{s.sender_city} → {s.receiver_city}</p><p className="font-mono text-xs text-muted-foreground">{s.tracking_number}</p></div>
