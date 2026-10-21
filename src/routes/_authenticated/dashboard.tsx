@@ -101,6 +101,8 @@ function Dashboard() {
         </section>
       )}
 
+      {isAdmin && <BookingScores />}
+
       <div className="mt-8"><TrackPanel /></div>
       <div className="mt-10 flex items-center justify-between">
         <h2 className="font-display text-2xl font-extrabold">Recent orders</h2>
