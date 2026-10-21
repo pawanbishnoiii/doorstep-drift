@@ -61,14 +61,15 @@ export const createShipment = createServerFn({ method: "POST" })
     if (!from?.active) throw new Error(`Pickup pincode ${data.sender.pincode} is not serviceable yet.`);
     if (!to?.active) throw new Error(`Delivery pincode ${data.receiver.pincode} is not serviceable yet.`);
 
-    const [{data:rateRows,error:rateError},{data:settings,error:settingsError}] = await Promise.all([sb.from("service_rates").select("*"),sb.from("app_settings").select("cash_on_pickup").eq("id",true).single()]);
+    // Missing rate/setting rows fall back to the defaults in pricing.ts and pay-at-pickup enabled.
+    const [{data:rateRows,error:rateError},{data:settings,error:settingsError}] = await Promise.all([sb.from("service_rates").select("*"),sb.from("app_settings").select("cash_on_pickup").eq("id",true).maybeSingle()]);
     if(rateError || settingsError) throw new Error("Delivery settings could not be loaded.");
     const rates:ServiceRates={}; for(const r of rateRows??[]) rates[r.service as ServiceLevel]={base:Number(r.base),perKg:Number(r.per_kg),active:r.active};
     // Team (state) prices set by the pickup state's managers override the national rate.
     const { data: teamRows } = await sb.from("state_rates").select("*").eq("state", from.state);
     for (const r of teamRows ?? []) rates[r.service as ServiceLevel] = { base: Number(r.base), perKg: Number(r.per_kg), active: r.active };
     if(!serviceAllowed(data.service,from.city,to.city,rates)) throw new Error("This service is unavailable for the selected cities.");
-    if(data.payment_method==="cash_on_pickup" && !settings?.cash_on_pickup) throw new Error("Pay at pickup is currently disabled.");
+    if(data.payment_method==="cash_on_pickup" && settings && !settings.cash_on_pickup) throw new Error("Pay at pickup is currently disabled.");
     const totalKg = data.pieces.reduce((a, p) => a + p.weight_kg, 0);
     const q = quote({ fromPin: data.sender.pincode, toPin: data.receiver.pincode, weightKg: totalKg, service: data.service, pieces:data.pieces.map(p=>({...p,dims:p.dims??data.dims})), rates });
     const cp = data.coupon_code ? await resolveCoupon(data.coupon_code, context.userId, q.total) : null;
