@@ -1,27 +1,5 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1792567451714,
-      "tag": "0000_remix_empty_baseline",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1792568597141,
-      "tag": "0001_phone_login_otps",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1792568969677,
-      "tag": "0002_roles_onboarding_integrations_team_rates",
-      "breakpoints": true
-    }
-  ]
+  "entries": []
 }
