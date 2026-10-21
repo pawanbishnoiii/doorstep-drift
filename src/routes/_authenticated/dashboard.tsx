@@ -8,6 +8,7 @@ import { AppShell, PageHeader, Stat } from "@/components/site/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { ROLE_LABEL, useRoles } from "@/hooks/use-roles";
+import { scoreBooking } from "@/lib/ops-rules";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Get Xpress" }, { name: "description", content: "Your Get Xpress shipping dashboard." }, { property: "og:title", content: "Dashboard — Get Xpress" }, { property: "og:description", content: "Your Get Xpress shipping dashboard." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
@@ -118,5 +119,33 @@ function Dashboard() {
         ))}
       </div>
     </AppShell>
+  );
+}
+
+function BookingScores() {
+  const { data = [] } = useQuery({
+    queryKey: ["booking-scores"],
+    queryFn: async () => {
+      const { data: rows } = await supabase.from("shipments").select("id,tracking_number,weight_kg,pieces_count,declared_value,payment_method,receiver_phone,receiver_address,receiver_pincode,sender_city,receiver_city,created_at").order("created_at", { ascending: false }).limit(15);
+      const pins = [...new Set((rows ?? []).map((r) => r.receiver_pincode))];
+      const { data: ok } = pins.length ? await supabase.from("pincodes").select("pincode").in("pincode", pins).eq("active", true) : { data: [] };
+      const live = new Set((ok ?? []).map((p) => p.pincode));
+      return (rows ?? []).map((r) => ({ ...r, ...scoreBooking({ ...r, weight_kg: Number(r.weight_kg), declared_value: r.declared_value == null ? null : Number(r.declared_value), serviceable: live.has(r.receiver_pincode), same_city: r.sender_city === r.receiver_city }) }));
+    },
+  });
+  return (
+    <section className="mt-8 rounded-lg border bg-card p-5">
+      <h2 className="font-display text-2xl font-extrabold">Booking quality scores</h2>
+      <p className="text-sm text-muted-foreground">Checked from parcel details and serviceability. Lower score = needs attention.</p>
+      <div className="mt-4 divide-y">
+        {data.length === 0 && <p className="py-4 text-sm text-muted-foreground">No bookings yet.</p>}
+        {data.map((b) => (
+          <div key={b.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+            <div><p className="font-mono font-bold">{b.tracking_number}</p><p className="text-xs text-muted-foreground">{b.sender_city} → {b.receiver_city} · {b.reason}</p></div>
+            <span className={`rounded-full px-3 py-1 font-bold ${b.score >= 80 ? "bg-lime text-ink" : b.score >= 50 ? "bg-cream" : "bg-destructive text-destructive-foreground"}`}>{b.score}</span>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
