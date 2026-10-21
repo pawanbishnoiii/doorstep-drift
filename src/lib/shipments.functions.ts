@@ -19,6 +19,7 @@ const input = z.object({
   contents: z.string().trim().max(200).optional(),
   declared_value: z.number().min(0).max(1_000_000).default(0),
   payment_method: z.enum(["cash_on_pickup", "online"]).default("cash_on_pickup"),
+  booking_otp: z.string().regex(/^\d{6}$/, "Enter the 6-digit confirmation code"),
   coupon_code: z.string().trim().toUpperCase().max(30).optional(),
   pickup: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).optional(),
   dims: z.object({ l: z.number().min(1).max(300), w: z.number().min(1).max(300), h: z.number().min(1).max(300) }).optional(),
@@ -53,6 +54,17 @@ export const createShipment = createServerFn({ method: "POST" })
     const sb = context.supabase;
     const { data: profile } = await sb.from("profiles").select("phone_verified").eq("id", context.userId).maybeSingle();
     if (!profile?.phone_verified) throw new Error("Verify your mobile number before booking.");
+    {
+      // Every booking is confirmed with a one-time code sent to the account's mobile.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: otp } = await supabaseAdmin.from("phone_otps").select("*").eq("user_id", context.userId).is("consumed_at", null).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (!otp || new Date(otp.expires_at) < new Date()) throw new Error("Confirmation code expired. Request a new one.");
+      if (otp.attempts >= 5) throw new Error("Too many attempts. Request a new code.");
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${context.userId}:${data.booking_otp}`));
+      const hash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+      if (hash !== otp.code_hash) { await supabaseAdmin.from("phone_otps").update({ attempts: otp.attempts + 1 }).eq("id", otp.id); throw new Error("Incorrect confirmation code."); }
+      await supabaseAdmin.from("phone_otps").update({ consumed_at: new Date().toISOString() }).eq("id", otp.id);
+    }
 
     // Pincodes must exist in the master list (serviceability)
     const { data: pins } = await sb.from("pincodes").select("pincode,city,state,zone,active").in("pincode", [data.sender.pincode, data.receiver.pincode]);
