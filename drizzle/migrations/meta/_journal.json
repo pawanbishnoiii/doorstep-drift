@@ -15,6 +15,13 @@
       "when": 1792587105658,
       "tag": "0001_bulk_seal_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792588508353,
+      "tag": "0002_customer_contact_and_provider_preferences",
+      "breakpoints": true
     }
   ]
 }
