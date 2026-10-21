@@ -869,6 +869,33 @@ export type Database = {
           },
         ]
       }
+      seal_codes: {
+        Row: {
+          batch_id: string
+          code: string
+          created_at: string
+          created_by: string
+          kind: string
+          used_bag_id: string | null
+        }
+        Insert: {
+          batch_id: string
+          code: string
+          created_at?: string
+          created_by: string
+          kind: string
+          used_bag_id?: string | null
+        }
+        Update: {
+          batch_id?: string
+          code?: string
+          created_at?: string
+          created_by?: string
+          kind?: string
+          used_bag_id?: string | null
+        }
+        Relationships: []
+      }
       service_rates: {
         Row: {
           active: boolean
@@ -1273,6 +1300,13 @@ export type Database = {
           phone: string
           roles: string[]
           user_id: string
+        }[]
+      }
+      generate_seal_codes: {
+        Args: { _count: number; _kind: string }
+        Returns: {
+          batch_id: string
+          code: string
         }[]
       }
       grant_staff_role: {

@@ -8,6 +8,13 @@
       "when": 1792571856034,
       "tag": "0000_remix_empty_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792587105658,
+      "tag": "0001_bulk_seal_codes",
+      "breakpoints": true
     }
   ]
 }
