@@ -23,3 +23,10 @@
 - [ ] Rider photo still shows old DropBox branding — regenerate
 - [ ] Dynamic hub application form (pincode autofill, state/district/city, WhatsApp, age, gender)
 - [ ] Landing page GSAP + parcel size icons; admin integrations (SMTP, payments, OTP, WhatsApp)
+
+## Oct 21 audit
+- [x] Database baseline applied cleanly (1 entry, all 28 tables + 39 functions present).
+- [x] Booking works even when price/settings rows are missing (uses default prices).
+- [x] Google address search + reverse lookup fixed; signed-in pincode suggestions use Google, guests use free map.
+- [ ] Load India pincodes — blocked: remix has no data; first user must claim Admin, then Staff console → "Load full India list".
+- [ ] Logos placement, Parcel images, scan sounds, bulk seal/plastic-bag codes, hub bag labels, AI booking summaries, Area/Cluster manager pincode flow — next rounds.

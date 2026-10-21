@@ -260,10 +260,31 @@ function StaffForm({ roles }: { roles: string[] }) {
 
 function ImportPanel({ isAdmin }: { isAdmin: boolean }) {
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState("");
   if (!isAdmin) return <p className="mt-5 rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Pincode CSV import is Admin-only.</p>;
+  const loadIndia = async () => {
+    setBusy(true);
+    try {
+      const text = await (await fetch("/data/india-pincodes.csv")).text();
+      const rows = text.split(/\r?\n/).slice(1).map((l) => { const [pincode = "", city = "", state = ""] = l.split(","); return { pincode, city, state, tier: "", zone: "" }; }).filter((r) => /^\d{6}$/.test(r.pincode));
+      let total = 0;
+      for (let i = 0; i < rows.length; i += 1000) {
+        const { data, error } = await supabase.rpc("import_pincodes", { _rows: rows.slice(i, i + 1000) });
+        if (error) throw new Error(error.message);
+        total += data as number; setProgress(`${total.toLocaleString("en-IN")} / ${rows.length.toLocaleString("en-IN")}`);
+      }
+      toast.success(`Loaded ${total.toLocaleString("en-IN")} India pincodes`);
+    } catch (err) { toast.error((err as Error).message); }
+    setBusy(false);
+  };
   return (
     <div className="mt-5 rounded-lg border bg-card p-4">
-      <p className="font-bold">Import pincode CSV</p>
+      <p className="font-bold">India pincode list</p>
+      <p className="mt-1 text-xs text-muted-foreground">Loads all 19,238 India pincodes (city + state). Safe to run again — existing pincodes are updated, not duplicated.</p>
+      <button type="button" disabled={busy} onClick={loadIndia} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-lg border-2 border-primary font-bold text-primary disabled:opacity-60">
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} {busy && progress ? `Loading ${progress}` : "Load full India list"}
+      </button>
+      <p className="mt-5 font-bold">Import pincode CSV</p>
       <p className="mt-1 text-xs text-muted-foreground">Columns: Pincode, City, State, Tier, Zone. Existing pincodes are updated; every import is logged in the audit trail.</p>
       <label className="mt-3 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary font-bold text-primary-foreground">
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Choose CSV
