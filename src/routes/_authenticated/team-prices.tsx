@@ -33,7 +33,7 @@ function TeamPrices() {
   const save = async (service: string, base: number, per_kg: number, active: boolean) => {
     if (base < 0 || per_kg < 0) { toast.error("Prices cannot be negative."); return; }
     const { data: u } = await supabase.auth.getUser();
-    const r = await supabase.from("state_rates").upsert({ state, service, base, per_kg, active, set_by: u.user?.id, updated_at: new Date().toISOString() });
+    const r = await supabase.from("state_rates").upsert({ state, service, base, per_kg, active, set_by: u.user?.id ?? null, updated_at: new Date().toISOString() });
     if (r.error) toast.error(r.error.message.includes("row-level") ? "You can only set prices for your own state." : r.error.message);
     else { toast.success(`${state} price saved`); qc.invalidateQueries({ queryKey: ["state-rates", state] }); }
   };

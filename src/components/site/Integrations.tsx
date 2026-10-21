@@ -34,7 +34,7 @@ export function Integrations() {
       <section className="grid gap-4 rounded-lg border bg-card p-5 md:grid-cols-2">
         <h3 className="font-bold md:col-span-2">Email alerts (Gmail / Hostinger)</h3>
         <L label="Admin alert email"><input name="admin_alert_email" type="email" defaultValue={s.admin_alert_email ?? ""} placeholder="ops@getxpress.in" className={field} /></L>
-        <L label="Provider"><select name="smtp_provider" defaultValue={s.smtp_provider} className={field} onChange={(e) => { const p = SMTP[e.target.value]; const form = e.target.form!; (form.elements.namedItem("smtp_host") as HTMLInputElement).value = p.host; (form.elements.namedItem("smtp_port") as HTMLInputElement).value = String(p.port); }}><option value="gmail">Gmail</option><option value="hostinger">Hostinger</option><option value="custom">Other</option></select></L>
+        <L label="Provider"><select name="smtp_provider" defaultValue={s.smtp_provider} className={field} onChange={(e) => { const p = SMTP[e.target.value] ?? { host: "", port: 587 }; const form = e.target.form!; (form.elements.namedItem("smtp_host") as HTMLInputElement).value = p.host; (form.elements.namedItem("smtp_port") as HTMLInputElement).value = String(p.port); }}><option value="gmail">Gmail</option><option value="hostinger">Hostinger</option><option value="custom">Other</option></select></L>
         <L label="SMTP host"><input name="smtp_host" defaultValue={s.smtp_host ?? SMTP[s.smtp_provider]?.host} className={field} /></L>
         <L label="Port"><input name="smtp_port" type="number" defaultValue={s.smtp_port ?? SMTP[s.smtp_provider]?.port} className={field} /></L>
         <L label="Login email"><input name="smtp_user" defaultValue={s.smtp_user ?? ""} className={field} /></L>
