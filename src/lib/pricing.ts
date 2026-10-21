@@ -6,11 +6,21 @@ export const services: Record<ServiceLevel, { label: string; eta: string; base: 
   same_day: { label: "Same day (intra-city)", eta: "Today", base: 149, perKg: 70 },
 };
 
+export type Dims = { l: number; w: number; h: number };
+export type PieceInput = { weight_kg: number; dims?: Dims | undefined };
+
+export const volumetric = (d?: Dims) => (d ? (d.l * d.w * d.h) / 5000 : 0);
+
 /** Billable weight = max(actual, volumetric L*W*H/5000), rounded up to 0.5 kg. */
-export function billableWeight(actualKg: number, dims?: { l: number; w: number; h: number }) {
-  const vol = dims ? (dims.l * dims.w * dims.h) / 5000 : 0;
-  const w = Math.max(actualKg, vol, 0.5);
+export function billableWeight(actualKg: number, dims?: Dims) {
+  const w = Math.max(actualKg, volumetric(dims), 0.5);
   return Math.ceil(w * 2) / 2;
+}
+
+/** Shipment billable weight: each parcel billed on max(actual, volumetric), summed, rounded up to 0.5 kg. */
+export function piecesBillable(pieces: PieceInput[]) {
+  const sum = pieces.reduce((a, p) => a + Math.max(p.weight_kg, volumetric(p.dims)), 0);
+  return Math.ceil(Math.max(sum, 0.5) * 2) / 2;
 }
 
 /** Zone surcharge from pincode distance: same first 3 digits = local, same first digit = regional, else national. */
@@ -22,9 +32,9 @@ export function zoneOf(fromPin: string, toPin: string): "local" | "regional" | "
 
 const zoneMultiplier = { local: 1, regional: 1.25, national: 1.6 } as const;
 
-export function quote(params: { fromPin: string; toPin: string; weightKg: number; service: ServiceLevel; dims?: { l: number; w: number; h: number } | undefined }) {
+export function quote(params: { fromPin: string; toPin: string; weightKg: number; service: ServiceLevel; dims?: Dims | undefined; pieces?: PieceInput[] | undefined }) {
   const s = services[params.service];
-  const weight = billableWeight(params.weightKg, params.dims);
+  const weight = params.pieces?.length ? piecesBillable(params.pieces) : billableWeight(params.weightKg, params.dims);
   const zone = zoneOf(params.fromPin, params.toPin);
   const freight = (s.base + s.perKg * Math.max(0, weight - 0.5)) * zoneMultiplier[zone];
   const gst = freight * 0.18;
