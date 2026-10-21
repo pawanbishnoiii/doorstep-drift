@@ -92,6 +92,23 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  // Sessions signed with a retired key fail server checks ("No suitable key").
+  // Detect them on load and refresh, or sign out if refresh fails.
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token; if (!token) return;
+      try {
+        const header = JSON.parse(atob(token.split(".")[0]!.replace(/-/g, "+").replace(/_/g, "/")));
+        const jwks = await (await fetch(`${import.meta.env["VITE_SUPABASE_URL"]}/auth/v1/.well-known/jwks.json`)).json();
+        const known = (jwks.keys ?? []).some((k: { kid?: string }) => k.kid === header.kid);
+        if (header.alg !== "HS256" && !known) {
+          const r = await supabase.auth.refreshSession();
+          if (r.error) await supabase.auth.signOut();
+        }
+      } catch { /* ignore malformed tokens; server will reject */ }
+    })();
+  }, []);
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;

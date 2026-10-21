@@ -7,6 +7,7 @@ import { CircleDot, Loader2, PackageSearch } from "lucide-react";
 import { SiteNav, MobileTabBar } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
+import { TrackAssistant } from "@/components/site/TrackAssistant";
 
 export const Route = createFileRoute("/track")({
   validateSearch: (s) => z.object({ id: z.coerce.string().max(30).optional() }).parse(s),
@@ -75,6 +76,7 @@ function Track() {
                 </ol>
               </motion.div>
             )}
+            {data && <TrackAssistant tracking={data.tracking_number} />}
           </div>
         </div>
       </section>

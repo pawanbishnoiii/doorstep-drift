@@ -23,6 +23,7 @@ import { Route as AuthenticatedCommissionsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedConsoleRouteImport } from './routes/_authenticated/console'
 import { Route as AuthenticatedCouponsRouteImport } from './routes/_authenticated/coupons'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDiagnosticsRouteImport } from './routes/_authenticated/diagnostics'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
@@ -42,6 +43,7 @@ import { Route as AuthenticatedUsersDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedUsersOrdersRouteImport } from './routes/_authenticated/users.orders'
 import { Route as AuthenticatedUsersReturnsRouteImport } from './routes/_authenticated/users.returns'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
+import { Route as ApiPublicTrackAssistantRouteImport } from './routes/api/public/track-assistant'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -114,6 +116,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDiagnosticsRoute =
+  AuthenticatedDiagnosticsRouteImport.update({
+    id: '/diagnostics',
+    path: '/diagnostics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
@@ -217,6 +225,11 @@ const ApiPublicHealthCheckRoute = ApiPublicHealthCheckRouteImport.update({
   path: '/api/public/health-check',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTrackAssistantRoute = ApiPublicTrackAssistantRouteImport.update({
+  id: '/api/public/track-assistant',
+  path: '/api/public/track-assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -232,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/console': typeof AuthenticatedConsoleRoute
   '/coupons': typeof AuthenticatedCouponsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/diagnostics': typeof AuthenticatedDiagnosticsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/orders': typeof AuthenticatedOrdersRoute
@@ -251,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/users/orders': typeof AuthenticatedUsersOrdersRoute
   '/users/returns': typeof AuthenticatedUsersReturnsRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/api/public/track-assistant': typeof ApiPublicTrackAssistantRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -266,6 +281,7 @@ export interface FileRoutesByTo {
   '/console': typeof AuthenticatedConsoleRoute
   '/coupons': typeof AuthenticatedCouponsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/diagnostics': typeof AuthenticatedDiagnosticsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/orders': typeof AuthenticatedOrdersRoute
@@ -285,6 +301,7 @@ export interface FileRoutesByTo {
   '/users/orders': typeof AuthenticatedUsersOrdersRoute
   '/users/returns': typeof AuthenticatedUsersReturnsRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/api/public/track-assistant': typeof ApiPublicTrackAssistantRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -302,6 +319,7 @@ export interface FileRoutesById {
   '/_authenticated/console': typeof AuthenticatedConsoleRoute
   '/_authenticated/coupons': typeof AuthenticatedCouponsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/diagnostics': typeof AuthenticatedDiagnosticsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
@@ -321,6 +339,7 @@ export interface FileRoutesById {
   '/_authenticated/users/orders': typeof AuthenticatedUsersOrdersRoute
   '/_authenticated/users/returns': typeof AuthenticatedUsersReturnsRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
+  '/api/public/track-assistant': typeof ApiPublicTrackAssistantRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -338,6 +357,7 @@ export interface FileRouteTypes {
     | '/console'
     | '/coupons'
     | '/dashboard'
+    | '/diagnostics'
     | '/notifications'
     | '/onboarding'
     | '/orders'
@@ -357,6 +377,7 @@ export interface FileRouteTypes {
     | '/users/orders'
     | '/users/returns'
     | '/api/public/health-check'
+    | '/api/public/track-assistant'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -372,6 +393,7 @@ export interface FileRouteTypes {
     | '/console'
     | '/coupons'
     | '/dashboard'
+    | '/diagnostics'
     | '/notifications'
     | '/onboarding'
     | '/orders'
@@ -391,6 +413,7 @@ export interface FileRouteTypes {
     | '/users/orders'
     | '/users/returns'
     | '/api/public/health-check'
+    | '/api/public/track-assistant'
   id:
     | '__root__'
     | '/'
@@ -407,6 +430,7 @@ export interface FileRouteTypes {
     | '/_authenticated/console'
     | '/_authenticated/coupons'
     | '/_authenticated/dashboard'
+    | '/_authenticated/diagnostics'
     | '/_authenticated/notifications'
     | '/_authenticated/onboarding'
     | '/_authenticated/orders'
@@ -426,6 +450,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users/orders'
     | '/_authenticated/users/returns'
     | '/api/public/health-check'
+    | '/api/public/track-assistant'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -437,6 +462,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TrackRoute: typeof TrackRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
+  ApiPublicTrackAssistantRoute: typeof ApiPublicTrackAssistantRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -537,6 +563,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/diagnostics': {
+      id: '/_authenticated/diagnostics'
+      path: '/diagnostics'
+      fullPath: '/diagnostics'
+      preLoaderRoute: typeof AuthenticatedDiagnosticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/notifications': {
@@ -672,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/track-assistant': {
+      id: '/api/public/track-assistant'
+      path: '/api/public/track-assistant'
+      fullPath: '/api/public/track-assistant'
+      preLoaderRoute: typeof ApiPublicTrackAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -683,6 +723,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConsoleRoute: typeof AuthenticatedConsoleRoute
   AuthenticatedCouponsRoute: typeof AuthenticatedCouponsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDiagnosticsRoute: typeof AuthenticatedDiagnosticsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
@@ -711,6 +752,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConsoleRoute: AuthenticatedConsoleRoute,
   AuthenticatedCouponsRoute: AuthenticatedCouponsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDiagnosticsRoute: AuthenticatedDiagnosticsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
@@ -743,6 +785,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TrackRoute: TrackRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
+  ApiPublicTrackAssistantRoute: ApiPublicTrackAssistantRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

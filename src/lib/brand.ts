@@ -5,7 +5,7 @@ export const brand = {
   domain: "getxpress.in",
   tagline: "Every parcel. Moving forward.",
   supportPhone: "+91 00000 00000",
-  supportEmail: "care@getxpress.in",
+  supportEmail: "help@getxpress.in",
 };
 
 /** Public base URL used in labels/QR codes. Set VITE_PUBLIC_BASE_URL once the final domain is live. */
