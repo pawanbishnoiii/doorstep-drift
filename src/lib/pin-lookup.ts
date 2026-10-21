@@ -1,59 +1,28 @@
-import { supabase } from "@/integrations/supabase/client";
-import { searchPlaces, type GeoHit } from "./geo";
-import { googlePlaceSearch } from "./maps.functions";
-
-/** Google place search for signed-in users; free OpenStreetMap for guests or if Google fails. */
-async function mapSearch(q: string): Promise<GeoHit[]> {
-  const { data } = await supabase.auth.getSession();
-  if (data.session) {
-    const g = await googlePlaceSearch({ data: { q } }).catch(() => [] as GeoHit[]);
-    if (g.some((h) => h.pincode)) return g;
-  }
-  return searchPlaces(q).catch(() => []);
+import { supabase } from '@/integrations/supabase/client';
+import { searchLocations } from './location-search';
+import { createSearchCache } from './search-cache';
+export type PinHit = { pincode:string; city:string; state:string; zone?:string|null; source:'master'|'map'; lat?:number; lng?:number; label?:string };
+const cache=createSearchCache<PinHit[]>(120_000);
+export async function lookupPins(raw:string):Promise<PinHit[]> {
+ const q=raw.trim().slice(0,120); if(q.length<2) return [];
+ return cache.get(q.toLowerCase(),async()=>{
+  const isPin=/^\d+$/.test(q);
+  const master=async():Promise<PinHit[]>=>{
+   const base=supabase.from('pincodes').select('pincode,city,state,zone').eq('active',true).limit(12);
+   const {data,error}=isPin?await base.like('pincode',`${q}%`).order('pincode'):await base.ilike('city',`${q.replace(/[%_]/g,'')}%`).order('city');
+   if(error) throw new Error('Could not check serviceable pincodes. Please retry.');
+   return (data??[]).map(r=>({...r,source:'master'}));
+  };
+  const maps=async():Promise<PinHit[]>=>{
+   if(isPin||q.length<3) return [];
+   const places=await searchLocations(q);
+   const codes=[...new Set(places.map(p=>p.pincode).filter((p):p is string=>Boolean(p&&/^\d{6}$/.test(p))))];
+   if(!codes.length) return [];
+   const {data}=await supabase.from('pincodes').select('pincode,city,state').eq('active',true).in('pincode',codes);
+   return places.flatMap(p=>{const found=data?.find(s=>s.pincode===p.pincode);return found?[{...found,source:'map' as const,lat:p.lat,lng:p.lng,label:p.label}]:[]});
+  };
+  const [a,b]=await Promise.all([master(),maps().catch(()=>[])]);
+  return [...a,...b.filter(p=>!a.some(s=>s.pincode===p.pincode))].slice(0,12);
+ });
 }
-
-/** Pincode + locality suggestions. Reads the public pincode master straight from the browser with an in-memory cache. */
-export type PinHit = { pincode: string; city: string; state: string; zone?: string | null; source: "master" | "map"; lat?: number; lng?: number; label?: string };
-
-const cache = new Map<string, PinHit[]>();
-
-export async function lookupPins(raw: string): Promise<PinHit[]> {
-  const q = raw.trim();
-  if (q.length < 2) return [];
-  const key = q.toLowerCase();
-  const hit = cache.get(key);
-  if (hit) return hit;
-  // Reuse a cached shorter prefix result when it is already narrow
-  for (let i = key.length - 1; i >= 2; i--) {
-    const prev = cache.get(key.slice(0, i));
-    if (prev && prev.length < 12 && prev.every((p) => p.source === "master")) {
-      const f = prev.filter((p) => (/^\d+$/.test(q) ? p.pincode.startsWith(q) : p.city.toLowerCase().includes(key)));
-      if (f.length) { cache.set(key, f); return f; }
-      break;
-    }
-  }
-  const isPin = /^\d+$/.test(q);
-  const base = supabase.from("pincodes").select("pincode,city,state,zone").eq("active", true).limit(12);
-  const { data } = isPin ? await base.like("pincode", `${q}%`).order("pincode") : await base.ilike("city", `${q.replace(/[%_]/g, "")}%`).order("city");
-  let rows: PinHit[] = (data ?? []).map((r) => ({ ...r, source: "master" as const }));
-  // Locality names (e.g. "Malviya Nagar") are not in the master list — ask the free map for them
-  if (!isPin && rows.length < 4 && q.length >= 3) {
-    const places = await mapSearch(q);
-    const mapRows = places.flatMap((p) => p.pincode && /^\d{6}$/.test(p.pincode) ? [{ pincode: p.pincode, city: p.city ?? "", state: p.state ?? "", source: "map" as const, lat: p.lat, lng: p.lng, label: p.label }] : []);
-    // Keep only map results whose pincode we actually serve, and use the master city/state for them.
-    if (mapRows.length) {
-      const { data: served } = await supabase.from("pincodes").select("pincode,city,state").eq("active", true).in("pincode", [...new Set(mapRows.map((r) => r.pincode))]);
-      const m = new Map((served ?? []).map((s) => [s.pincode, s]));
-      rows = rows.concat(mapRows.filter((r) => m.has(r.pincode)).map((r) => ({ ...r, city: m.get(r.pincode)!.city, state: m.get(r.pincode)!.state })));
-    }
-  }
-  cache.set(key, rows);
-  return rows;
-}
-
-/** Exact pincode check against the serviceable master list. */
-export async function pinInfo(pin: string): Promise<PinHit | null> {
-  if (!/^\d{6}$/.test(pin)) return null;
-  const rows = await lookupPins(pin);
-  return rows.find((r) => r.pincode === pin && r.source === "master") ?? null;
-}
+export async function pinInfo(pin:string):Promise<PinHit|null>{if(!/^\d{6}$/.test(pin))return null;return (await lookupPins(pin)).find(r=>r.pincode===pin&&r.source==='master')??null;}

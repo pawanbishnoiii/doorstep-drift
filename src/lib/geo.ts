@@ -18,9 +18,9 @@ export async function searchPlaces(q: string): Promise<GeoHit[]> {
   const json = await res.json() as {features?: {geometry:{coordinates:number[]};properties:Record<string,string>}[]};
   return (json.features ?? []).flatMap(f => {
     const [lng,lat] = f.geometry.coordinates;
-    if (lat === undefined || lng === undefined || f.properties.countrycode?.toUpperCase() !== 'IN') return [];
+    if (lat === undefined || lng === undefined || f.properties['countrycode']?.toUpperCase() !== 'IN') return [];
     const p = f.properties;
-    return [{lat,lng,label:[p.name,p.street,p.city,p.state,p.postcode].filter(Boolean).join(', '),pincode:p.postcode,city:p.city ?? p.district ?? p.county,state:p.state}];
+    return [{lat,lng,label:[p['name'],p['street'],p['city'],p['state'],p['postcode']].filter(Boolean).join(', '),pincode:p['postcode'],city:p['city'] ?? p['district'] ?? p['county'],state:p['state']}];
   });
 }
 
