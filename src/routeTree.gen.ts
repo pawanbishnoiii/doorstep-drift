@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PointPartnerRouteImport } from './routes/point-partner'
+import { Route as ShipRouteImport } from './routes/ship'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
@@ -23,7 +24,6 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
-import { Route as AuthenticatedShipRouteImport } from './routes/_authenticated/ship'
 import { Route as AuthenticatedVerifyPhoneRouteImport } from './routes/_authenticated/verify-phone'
 import { Route as AuthenticatedLabelsShipmentIdRouteImport } from './routes/_authenticated/labels.$shipmentId'
 import { Route as AuthenticatedPayShipmentIdRouteImport } from './routes/_authenticated/pay.$shipmentId'
@@ -46,6 +46,11 @@ const AuthRoute = AuthRouteImport.update({
 const PointPartnerRoute = PointPartnerRouteImport.update({
   id: '/point-partner',
   path: '/point-partner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShipRoute = ShipRouteImport.update({
+  id: '/ship',
+  path: '/ship',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -100,11 +105,6 @@ const AuthenticatedScanRoute = AuthenticatedScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedShipRoute = AuthenticatedShipRouteImport.update({
-  id: '/ship',
-  path: '/ship',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedVerifyPhoneRoute =
   AuthenticatedVerifyPhoneRouteImport.update({
     id: '/verify-phone',
@@ -133,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/ship': typeof ShipRoute
   '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -143,7 +144,6 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRoute
   '/scan': typeof AuthenticatedScanRoute
-  '/ship': typeof AuthenticatedShipRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/pay/$shipmentId': typeof AuthenticatedPayShipmentIdRoute
@@ -153,6 +153,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/ship': typeof ShipRoute
   '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -163,7 +164,6 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRoute
   '/scan': typeof AuthenticatedScanRoute
-  '/ship': typeof AuthenticatedShipRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/pay/$shipmentId': typeof AuthenticatedPayShipmentIdRoute
@@ -175,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/point-partner': typeof PointPartnerRoute
+  '/ship': typeof ShipRoute
   '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
@@ -185,7 +186,6 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
-  '/_authenticated/ship': typeof AuthenticatedShipRoute
   '/_authenticated/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/_authenticated/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/_authenticated/pay/$shipmentId': typeof AuthenticatedPayShipmentIdRoute
@@ -197,6 +197,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/point-partner'
+    | '/ship'
     | '/terms'
     | '/track'
     | '/analytics'
@@ -207,7 +208,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/orders'
     | '/scan'
-    | '/ship'
     | '/verify-phone'
     | '/labels/$shipmentId'
     | '/pay/$shipmentId'
@@ -217,6 +217,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/point-partner'
+    | '/ship'
     | '/terms'
     | '/track'
     | '/analytics'
@@ -227,7 +228,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/orders'
     | '/scan'
-    | '/ship'
     | '/verify-phone'
     | '/labels/$shipmentId'
     | '/pay/$shipmentId'
@@ -238,6 +238,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/point-partner'
+    | '/ship'
     | '/terms'
     | '/track'
     | '/_authenticated/analytics'
@@ -248,7 +249,6 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/orders'
     | '/_authenticated/scan'
-    | '/_authenticated/ship'
     | '/_authenticated/verify-phone'
     | '/_authenticated/labels/$shipmentId'
     | '/_authenticated/pay/$shipmentId'
@@ -260,6 +260,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PointPartnerRoute: typeof PointPartnerRoute
+  ShipRoute: typeof ShipRoute
   TermsRoute: typeof TermsRoute
   TrackRoute: typeof TrackRoute
   ApiPublicHealthCheckRoute: typeof ApiPublicHealthCheckRoute
@@ -293,6 +294,13 @@ declare module '@tanstack/react-router' {
       path: '/point-partner'
       fullPath: '/point-partner'
       preLoaderRoute: typeof PointPartnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ship': {
+      id: '/ship'
+      path: '/ship'
+      fullPath: '/ship'
+      preLoaderRoute: typeof ShipRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -365,13 +373,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ship': {
-      id: '/_authenticated/ship'
-      path: '/ship'
-      fullPath: '/ship'
-      preLoaderRoute: typeof AuthenticatedShipRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/verify-phone': {
       id: '/_authenticated/verify-phone'
       path: '/verify-phone'
@@ -412,7 +413,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
-  AuthenticatedShipRoute: typeof AuthenticatedShipRoute
   AuthenticatedVerifyPhoneRoute: typeof AuthenticatedVerifyPhoneRoute
   AuthenticatedLabelsShipmentIdRoute: typeof AuthenticatedLabelsShipmentIdRoute
   AuthenticatedPayShipmentIdRoute: typeof AuthenticatedPayShipmentIdRoute
@@ -427,7 +427,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
-  AuthenticatedShipRoute: AuthenticatedShipRoute,
   AuthenticatedVerifyPhoneRoute: AuthenticatedVerifyPhoneRoute,
   AuthenticatedLabelsShipmentIdRoute: AuthenticatedLabelsShipmentIdRoute,
   AuthenticatedPayShipmentIdRoute: AuthenticatedPayShipmentIdRoute,
@@ -441,6 +440,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PointPartnerRoute: PointPartnerRoute,
+  ShipRoute: ShipRoute,
   TermsRoute: TermsRoute,
   TrackRoute: TrackRoute,
   ApiPublicHealthCheckRoute: ApiPublicHealthCheckRoute,
