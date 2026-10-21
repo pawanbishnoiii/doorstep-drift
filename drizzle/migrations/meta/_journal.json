@@ -36,6 +36,13 @@
       "when": 1792525899515,
       "tag": "0004_p1_signup_profile_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792553188175,
+      "tag": "0005_p1_returns_bags_manifests_commissions",
+      "breakpoints": true
     }
   ]
 }
