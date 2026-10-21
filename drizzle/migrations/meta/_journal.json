@@ -1,27 +1,5 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1792565185249,
-      "tag": "0000_remix_empty_baseline",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1792566224733,
-      "tag": "0001_wallet_hub_application_last_seen",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1792566411631,
-      "tag": "0002_state_manager_reviews_hub_applications",
-      "breakpoints": true
-    }
-  ]
+  "entries": []
 }
