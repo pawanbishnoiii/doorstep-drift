@@ -1,43 +1,57 @@
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
-  BarChart3, Bell, ClipboardList, Home, Loader2, LogOut, MapPin, PackagePlus, PackageSearch, ScanLine, ShieldCheck, Store, Ticket, UserRound, RotateCcw, Boxes, Coins, Settings,
+  BarChart3, Bell, ClipboardList, Home, Loader2, LogOut, MapPin, PackagePlus, ScanLine, ShieldCheck, Store, Ticket, UserRound, RotateCcw, Boxes, Coins, Settings, Wallet, Users, ClipboardCheck,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { useProfile } from "@/hooks/use-profile";
 import { ROLE_LABEL, useRoles } from "@/hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
 
-type NavItem = { to: string; label: string; icon: typeof Home; staff?: boolean; admin?: boolean };
+type NavItem = { to: string; label: string; icon: typeof Home; staff?: boolean; admin?: boolean; wallet?: boolean; customer?: boolean };
 const NAV: { group: string; items: NavItem[] }[] = [
-  { group: "Shipping", items: [
-    { to: "/dashboard", label: "Home", icon: Home },
-    { to: "/ship", label: "Add order", icon: PackagePlus },
-    { to: "/orders", label: "Orders", icon: ClipboardList },
-    { to: "/track", label: "Track", icon: PackageSearch },
+  { group: "My shipping", items: [
+    { to: "/users/dashboard", label: "Dashboard", icon: Home, customer: true },
+    { to: "/users/addorder", label: "Add order", icon: PackagePlus, customer: true },
+    { to: "/users/orders", label: "Orders", icon: ClipboardList, customer: true },
+    { to: "/users/returns", label: "Returns", icon: RotateCcw, customer: true },
+    { to: "/dashboard", label: "Dashboard", icon: Home, staff: true },
+    { to: "/users/addorder", label: "Book parcel", icon: PackagePlus, staff: true },
+    { to: "/orders", label: "Orders", icon: ClipboardList, staff: true },
+    { to: "/returns", label: "Returns & RTO", icon: RotateCcw, staff: true },
     { to: "/notifications", label: "Notifications", icon: Bell },
-    { to: "/returns", label: "Returns & RTO", icon: RotateCcw },
   ] },
   { group: "Operations", items: [
-    { to: "/analytics", label: "Analytics", icon: BarChart3, staff: true },
     { to: "/scan", label: "Scan parcels", icon: ScanLine, staff: true },
-    { to: "/console", label: "Pincodes & staff", icon: MapPin, staff: true },
-    { to: "/bags", label: "Bags & manifests", icon: Boxes, staff: true },
-    { to: "/commissions", label: "Commissions", icon: Coins, staff: true },
+    { to: "/tally", label: "Delivery tally", icon: ClipboardCheck, staff: true },
+    { to: "/bags", label: "Dispatch center", icon: Boxes, staff: true },
+    { to: "/wallet", label: "Wallet", icon: Wallet, wallet: true },
+    { to: "/analytics", label: "Analytics", icon: BarChart3, staff: true },
   ] },
   { group: "Admin", items: [
-    { to: "/applications", label: "Point applications", icon: Store, admin: true },
+    { to: "/team", label: "Users & last seen", icon: Users, admin: true },
+    { to: "/console", label: "Pincodes & staff", icon: MapPin, admin: true },
+    { to: "/commissions", label: "Commissions", icon: Coins, admin: true },
+    { to: "/applications", label: "Hub applications", icon: Store, admin: true },
     { to: "/coupons", label: "Offers & coupons", icon: Ticket, admin: true },
     { to: "/pincodes", label: "Pincode master", icon: MapPin, admin: true },
-    { to: "/settings", label: "Delivery & email", icon: Settings, admin: true },
+    { to: "/settings", label: "Settings & integrations", icon: Settings, admin: true },
   ] },
 ];
+
+function Clock() {
+  const [t, setT] = useState<Date | null>(null);
+  useEffect(() => { setT(new Date()); const i = setInterval(() => setT(new Date()), 30000); return () => clearInterval(i); }, []);
+  return <span>{t ? t.toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}</span>;
+}
 
 /** Signed-in frame: Shiprocket-style sidebar on desktop, app-style tab bar on phones. Requires verified phone. */
 export function AppShell({ children, requirePhone = true, wide = false }: { children: ReactNode; requirePhone?: boolean; wide?: boolean }) {
   const { data, isLoading } = useProfile();
-  const { isStaff, isAdmin, primary } = useRoles();
+  const { isStaff, isAdmin, primary, roles } = useRoles();
+  const isManager = roles.some((r) => r === "state_manager" || r === "state_director");
+  useEffect(() => { supabase.rpc("touch_last_seen").then(() => {}); }, []);
   const qc = useQueryClient();
   const navigate = useNavigate();
   if (isLoading) return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -47,13 +61,16 @@ export function AppShell({ children, requirePhone = true, wide = false }: { chil
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   };
-  const visible = (i: NavItem) => (!i.staff || isStaff) && (!i.admin || isAdmin);
+  const visible = (i: NavItem) => (!i.customer || !isStaff) && (!i.staff || isStaff) && (!i.admin || isAdmin || (isManager && i.to === "/applications")) && (!i.wallet || (isStaff && !isAdmin));
+  const phone = data?.profile?.phone ? `+91 ${data.profile.phone}` : "Phone not verified";
+  const city = (data?.profile as { city?: string | null } | null | undefined)?.city || "India";
+  const home = isStaff ? "/dashboard" : "/users/dashboard";
   const name = data?.profile?.full_name || data?.user.email || "";
 
   return (
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-ink text-ink-foreground lg:flex">
-        <Link to="/" className="px-6 py-5"><BrandMark /></Link>
+        <Link to="/" className="mx-4 my-4 rounded-xl bg-card px-3 py-2"><BrandMark /></Link>
         <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
           {NAV.map((g) => {
             const items = g.items.filter(visible);
@@ -73,7 +90,8 @@ export function AppShell({ children, requirePhone = true, wide = false }: { chil
         </nav>
         <div className="border-t border-ink-foreground/10 p-4">
           <p className="truncate text-sm font-bold">{name}</p>
-          <p className="text-xs text-ink-foreground/60">{primary ? ROLE_LABEL[primary] : "Customer"}</p>
+          <p className="font-mono text-xs text-ink-foreground/80">{phone}</p>
+          <p className="text-xs text-ink-foreground/60">{city} · {primary ? ROLE_LABEL[primary] : "Customer"}</p>
           <button onClick={signOut} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-ink-foreground/10 py-2 text-sm font-bold"><LogOut className="h-4 w-4" /> Sign out</button>
         </div>
       </aside>
@@ -82,9 +100,10 @@ export function AppShell({ children, requirePhone = true, wide = false }: { chil
         <header className="sticky top-0 z-30 border-b bg-background/85 px-4 py-3 backdrop-blur-xl lg:px-8">
           <div className="flex items-center justify-between">
             <Link to="/" className="lg:hidden"><BrandMark /></Link>
-            <p className="hidden text-sm font-semibold text-muted-foreground lg:block">{primary ? ROLE_LABEL[primary] : "Customer account"}</p>
+            <div className="hidden text-sm lg:block"><p className="font-bold">{name} <span className="font-mono font-semibold text-muted-foreground">· {phone}</span></p><p className="text-xs text-muted-foreground">{city} · <Clock /></p></div>
             <div className="flex items-center gap-2">
-              <Link to="/ship" className="hidden items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground sm:flex"><PackagePlus className="h-4 w-4" /> Add order</Link>
+              <Link to={isStaff ? "/scan" : "/users/dashboard"} className="hidden items-center gap-1.5 rounded-xl border bg-card px-4 py-2 text-sm font-bold sm:flex"><ScanLine className="h-4 w-4" /> Scan</Link>
+              <Link to="/users/addorder" className="hidden items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground sm:flex"><PackagePlus className="h-4 w-4" /> Add order</Link>
               <Link to="/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-xl border bg-card"><Bell className="h-4 w-4" /></Link>
               <button onClick={signOut} aria-label="Sign out" className="grid h-10 w-10 place-items-center rounded-xl border bg-card lg:hidden"><LogOut className="h-4 w-4" /></button>
             </div>
@@ -96,11 +115,11 @@ export function AppShell({ children, requirePhone = true, wide = false }: { chil
       <div className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] lg:hidden">
         <div className="mx-auto flex max-w-md items-center justify-around rounded-[24px] border bg-card/90 p-1.5 shadow-soft backdrop-blur-2xl">
           {([
-            { to: "/dashboard", icon: Home, label: "Home" },
-            { to: "/orders", icon: ClipboardList, label: "Orders" },
-            { to: "/ship", icon: PackagePlus, label: "Ship" },
-            isStaff ? { to: "/scan", icon: ScanLine, label: "Scan" } : { to: "/track", icon: PackageSearch, label: "Track" },
-            isStaff ? { to: "/console", icon: ShieldCheck, label: "Ops" } : { to: "/notifications", icon: UserRound, label: "Me" },
+            { to: home, icon: Home, label: "Home" },
+            { to: isStaff ? "/orders" : "/users/orders", icon: ClipboardList, label: "Orders" },
+            { to: "/users/addorder", icon: PackagePlus, label: "Ship" },
+            isStaff ? { to: "/scan", icon: ScanLine, label: "Scan" } : { to: "/users/returns", icon: RotateCcw, label: "Returns" },
+            isStaff && !isAdmin ? { to: "/wallet", icon: Wallet, label: "Wallet" } : isAdmin ? { to: "/team", icon: ShieldCheck, label: "Admin" } : { to: "/notifications", icon: UserRound, label: "Me" },
           ] as const).map(({ to, icon: Icon, label }) => (
             <Link key={to} to={to} className="flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[10px] font-bold text-muted-foreground" activeProps={{ className: "bg-primary text-primary-foreground" }}>
               <Icon className="h-5 w-5" />{label}

@@ -5,7 +5,7 @@ export type Role = "admin" | "state_director" | "state_manager" | "area_manager"
 
 export const ROLE_LABEL: Record<string, string> = {
   admin: "Admin / Head Office", state_director: "State Director", state_manager: "State Manager",
-  area_manager: "Area Manager", point: "Point / Mini Hub", network: "Network Ops",
+  area_manager: "Area Manager", point: "Hub", network: "Network Ops",
 };
 
 const ORDER: Role[] = ["admin", "state_director", "state_manager", "area_manager", "network", "point"];

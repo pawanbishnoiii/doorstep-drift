@@ -12,17 +12,17 @@ import { useSession } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
 import hubTeam from "@/assets/hub-team.jpg";
 import hubPartner from "@/assets/hub-partner.jpg";
-import upManager from "@/assets/up-hub-manager.jpg.asset.json";
-import upSeller from "@/assets/up-seller-packing.jpg.asset.json";
-import upCourier from "@/assets/up-hero-female-courier.jpg.asset.json";
-import upDoor from "@/assets/up-doorstep-delivery.jpg.asset.json";
+import upManagerImg from "@/assets/hub-team.jpg";
+import upSellerImg from "@/assets/gx-seller.jpg";
+import upCourierImg from "@/assets/login-courier.jpg";
+import upDoorImg from "@/assets/hub-partner.jpg";
 
 export const Route = createFileRoute("/point-partner")({
   head: () => ({
     meta: [
-      { title: "Become a Get Xpress Point — Earn from your shop | getxpress.in" },
-      { name: "description", content: "Turn your shop into a Get Xpress Point. Earn commission on every parcel booked, received and handed over. Zero franchise fee." },
-      { property: "og:title", content: "Become a Get Xpress Point partner" },
+      { title: "Become a Get Xpress Hub — Earn from your shop | getxpress.in" },
+      { name: "description", content: "Turn your shop into a Get Xpress Hub. Earn commission on every parcel booked, received and handed over. Zero franchise fee." },
+      { property: "og:title", content: "Become a Get Xpress Hub partner" },
       { property: "og:description", content: "Earn on every parcel from your counter. Apply in 3 minutes." },
     , { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }],
   }),
@@ -30,19 +30,25 @@ export const Route = createFileRoute("/point-partner")({
 });
 
 const schema = z.object({
-  full_name: z.string().trim().min(2).max(100),
+  full_name: z.string().trim().min(2, "Enter your full name").max(100),
   phone: z.string().trim().regex(/^[6-9]\d{9}$/, "Enter a 10-digit Indian mobile"),
-  email: z.string().trim().email().max(255),
-  business_name: z.string().trim().min(2).max(120),
+  whatsapp: z.string().trim().regex(/^[6-9]\d{9}$/, "Enter a 10-digit WhatsApp number"),
+  email: z.string().trim().email("Enter a valid email").max(255),
+  age: z.coerce.number({ invalid_type_error: "Enter your age" }).int().min(18, "You must be 18+").max(80),
+  gender: z.enum(["female", "male", "other"], { errorMap: () => ({ message: "Select gender" }) }),
+  business_name: z.string().trim().min(2, "Enter shop / business name").max(120),
   business_type: z.string().min(2).max(60),
-  city: z.string().trim().min(2).max(80),
-  state: z.string().trim().min(2).max(80),
-  pincode: z.string().regex(/^\d{6}$/, "6-digit pincode"),
-  address: z.string().trim().min(8).max(400),
-  space_sqft: z.coerce.number().int().min(20).max(100000),
-  daily_capacity: z.coerce.number().int().min(5).max(100000),
+  pincode: z.string().regex(/^\d{6}$/, "Enter a 6-digit pincode"),
+  state: z.string().trim().min(2, "Select your state").max(80),
+  district: z.string().trim().min(2, "Enter your district").max(80),
+  city: z.string().trim().min(2, "Enter your city / town").max(80),
+  address: z.string().trim().min(5, "Enter address line 1").max(200),
+  address_line2: z.string().trim().min(3, "Enter address line 2").max(200),
+  space_sqft: z.coerce.number({ invalid_type_error: "Enter space in sq ft" }).int().min(20, "Minimum 20 sq ft").max(100000),
+  daily_capacity: z.coerce.number({ invalid_type_error: "Enter parcels per day" }).int().min(5, "Minimum 5 parcels/day").max(100000),
   message: z.string().trim().max(1000).optional(),
 });
+const STATES = ["Andaman & Nicobar Islands","Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chandigarh","Chhattisgarh","Dadra & Nagar Haveli and Daman & Diu","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jammu & Kashmir","Jharkhand","Karnataka","Kerala","Ladakh","Lakshadweep","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Puducherry","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal"];
 
 const perks = [
   { icon: Coins, t: "Earn per parcel", d: "Commission on every booking, receive and handover — paid weekly.", c: "bg-sun" },
@@ -79,9 +85,9 @@ function PointPartner() {
           </div>
           <div className="hero-art relative">
             <div className="grid grid-cols-2 gap-3">
-              <img src={hubPartner} alt="Get Xpress Point partner at her counter" className="row-span-2 h-full rounded-[32px] object-cover shadow-soft" />
-              <img src={upManager.url} alt="Get Xpress hub manager" loading="lazy" className="aspect-square rounded-[28px] object-cover shadow-soft" />
-              <img src={upCourier.url} alt="Get Xpress courier" loading="lazy" className="aspect-square rounded-[28px] object-cover shadow-soft" />
+              <img src={hubPartner} alt="Get Xpress Hub partner at her counter" className="row-span-2 h-full rounded-[32px] object-cover shadow-soft" />
+              <img src={upManagerImg} alt="Get Xpress hub manager" loading="lazy" className="aspect-square rounded-[28px] object-cover shadow-soft" />
+              <img src={upCourierImg} alt="Get Xpress courier" loading="lazy" className="aspect-square rounded-[28px] object-cover shadow-soft" />
             </div>
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -bottom-6 left-6 flex items-center gap-3 rounded-2xl bg-card p-3 pr-5 shadow-soft">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-lime"><TrendingUp className="h-5 w-5" /></span>
@@ -137,7 +143,7 @@ function PointPartner() {
 
       <section className="px-4 pb-10 md:px-8">
         <div className="mx-auto flex max-w-[1240px] gap-3 overflow-x-auto pb-2">
-          {[upSeller.url, upDoor.url, upManager.url, upCourier.url].map((src, i) => (
+          {[upSellerImg, upDoorImg, upManagerImg, upCourierImg].map((src, i) => (
             <img key={i} src={src} alt="Get Xpress in action" loading="lazy" className="reveal h-64 w-72 shrink-0 rounded-[28px] object-cover" />
           ))}
         </div>
@@ -156,6 +162,26 @@ function ApplySection() {
   const { user, loading } = useSession();
   const [busy, setBusy] = useState(false);
   const [apps, setApps] = useState<App[]>([]);
+  const [loc, setLoc] = useState({ pincode: "", state: "", district: "", city: "" });
+  const [cities, setCities] = useState<string[]>([]);
+  const [pinBusy, setPinBusy] = useState(false);
+  const onPin = async (pin: string) => {
+    setLoc((l) => ({ ...l, pincode: pin }));
+    if (pin.length !== 6) return;
+    setPinBusy(true);
+    try {
+      const r = await fetch(`https://api.postalpincode.in/pincode/${pin}`).then((x) => x.json()).catch(() => null);
+      const offices: { Name: string; District: string; State: string; Block?: string }[] = r?.[0]?.PostOffice ?? [];
+      if (offices[0]) {
+        setLoc({ pincode: pin, state: offices[0].State, district: offices[0].District, city: offices[0].Block && offices[0].Block !== "NA" ? offices[0].Block : offices[0].District });
+        setCities([...new Set(offices.flatMap((o) => [o.Name, o.Block ?? ""]).filter((x) => x && x !== "NA"))]);
+      } else {
+        const { data } = await supabase.from("pincodes").select("city,state").eq("pincode", pin).maybeSingle();
+        if (data) setLoc({ pincode: pin, state: data.state, district: data.city, city: data.city });
+        else toast.error("Pincode not found — please fill state, district and city.");
+      }
+    } finally { setPinBusy(false); }
+  };
   const load = async () => {
     const { data } = await supabase.from("point_applications").select("reference,status,business_name,created_at").order("created_at", { ascending: false });
     setApps(data ?? []);
@@ -165,14 +191,15 @@ function ApplySection() {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
-    const parsed = schema.safeParse(Object.fromEntries(new FormData(e.currentTarget)));
+    const form = e.currentTarget;
+    const parsed = schema.safeParse(Object.fromEntries(new FormData(form)));
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Check the form"); return; }
     setBusy(true);
     const { error } = await supabase.from("point_applications").insert({ ...parsed.data, message: parsed.data.message ?? null, user_id: user.id });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Application submitted! We'll call you within 48 hours.");
-    e.currentTarget.reset();
+    form.reset(); setLoc({ pincode: "", state: "", district: "", city: "" });
     load();
   };
 
@@ -207,21 +234,27 @@ function ApplySection() {
           ) : (
             <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
               <input name="full_name" placeholder="Your full name" className={input} defaultValue={user.user_metadata?.["full_name"] ?? ""} />
-              <input name="phone" placeholder="Mobile (10 digits)" inputMode="numeric" maxLength={10} className={input} />
               <input name="email" type="email" placeholder="Email" className={input} defaultValue={user.email ?? ""} />
+              <input name="phone" placeholder="Mobile (10 digits)" inputMode="numeric" maxLength={10} className={input} />
+              <input name="whatsapp" placeholder="WhatsApp number" inputMode="numeric" maxLength={10} className={input} />
+              <input name="age" type="number" placeholder="Age" className={input} />
+              <select name="gender" className={input} defaultValue=""><option value="" disabled>Gender</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select>
               <input name="business_name" placeholder="Shop / business name" className={input} />
               <select name="business_type" className={input} defaultValue="Kirana / General store">
                 {["Kirana / General store", "Mobile & electronics", "Stationery / Xerox", "Boutique / Fashion", "Pharmacy", "Courier counter", "Other"].map((o) => <option key={o}>{o}</option>)}
               </select>
-              <input name="pincode" placeholder="Pincode" inputMode="numeric" maxLength={6} className={input} />
-              <input name="city" placeholder="City" className={input} />
-              <input name="state" placeholder="State" className={input} />
-              <textarea name="address" placeholder="Full shop address" className={`${input} h-24 py-3 sm:col-span-2`} />
+              <div className="relative sm:col-span-2"><input name="pincode" placeholder="Pincode — state & district fill automatically" inputMode="numeric" maxLength={6} className={input} value={loc.pincode} onChange={(e) => onPin(e.target.value.replace(/\D/g, ""))} />{pinBusy && <Loader2 className="absolute right-4 top-4 h-4 w-4 animate-spin" />}</div>
+              <select name="state" className={input} value={loc.state} onChange={(e) => setLoc({ ...loc, state: e.target.value })}><option value="">Select state</option>{STATES.map((s) => <option key={s}>{s}</option>)}{loc.state && !STATES.includes(loc.state) && <option>{loc.state}</option>}</select>
+              <input name="district" placeholder="District" className={input} value={loc.district} onChange={(e) => setLoc({ ...loc, district: e.target.value })} />
+              <input name="city" placeholder="City / town" className={`${input} sm:col-span-2`} list="pin-cities" value={loc.city} onChange={(e) => setLoc({ ...loc, city: e.target.value })} />
+              <datalist id="pin-cities">{cities.map((c) => <option key={c} value={c} />)}</datalist>
+              <input name="address" placeholder="Address line 1 (shop no., building)" className={`${input} sm:col-span-2`} />
+              <input name="address_line2" placeholder="Address line 2 (street, area, landmark)" className={`${input} sm:col-span-2`} />
               <input name="space_sqft" type="number" placeholder="Space for parcels (sq ft)" className={input} />
               <input name="daily_capacity" type="number" placeholder="Parcels you can handle / day" className={input} />
               <textarea name="message" placeholder="Anything else? (optional)" className={`${input} h-20 py-3 sm:col-span-2`} />
               <button disabled={busy} className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-ink font-bold text-ink-foreground sm:col-span-2">
-                {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <BadgeCheck className="h-5 w-5" />} Submit application
+                {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <BadgeCheck className="h-5 w-5" />} Submit hub application
               </button>
             </form>
           )}

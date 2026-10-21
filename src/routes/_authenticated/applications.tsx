@@ -12,7 +12,8 @@ export const Route = createFileRoute("/_authenticated/applications")({
 });
 
 function Applications() {
-  const { isAdmin } = useRoles();
+  const { isAdmin: admin, roles } = useRoles();
+  const isAdmin = admin || roles.some((r) => r === "state_manager" || r === "state_director");
   const qc = useQueryClient();
   const { data = [] } = useQuery({ queryKey: ["applications"], queryFn: async () => (await supabase.from("point_applications").select("*").order("created_at", { ascending: false })).data ?? [] });
   const setStatus = async (id: string, status: string) => {
@@ -21,7 +22,7 @@ function Applications() {
   };
   return (
     <AppShell wide>
-      <PageHeader title="Point applications" sub={isAdmin ? `${data.length} applications` : "Your applications"} />
+      <PageHeader title="Hub applications" sub={isAdmin ? `${data.length} applications` : "Your applications"} />
       <div className="grid gap-3 lg:grid-cols-2">
         {data.map((a) => (
           <div key={a.id} className="rounded-3xl border bg-card p-5">
@@ -36,7 +37,7 @@ function Applications() {
                 <button onClick={() => setStatus(a.id, "rejected")} className="flex-1 rounded-xl border py-2 text-sm font-bold">Reject</button>
               </div>
             )}
-            {isAdmin && a.status === "approved" && <p className="mt-3 rounded-xl bg-muted p-2 text-xs">Next: grant this applicant the Point role from <b>Pincodes & staff → Staff</b> (by phone), then an Area Manager allocates pincodes.</p>}
+            {isAdmin && a.status === "approved" && <p className="mt-3 rounded-xl bg-muted p-2 text-xs">Next: grant this applicant the Hub role from <b>Pincodes & staff → Staff</b> (by phone), then an Area Manager allocates pincodes.</p>}
           </div>
         ))}
         {data.length === 0 && <div className="rounded-3xl border border-dashed p-10 text-center text-muted-foreground lg:col-span-2"><Store className="mx-auto h-8 w-8" /><p className="mt-2">No applications yet.</p></div>}
