@@ -8,7 +8,7 @@ import imgLarge from "@/assets/parcel-large.webp";
 import imgXl from "@/assets/parcel-xl.webp";
 import imgFlyer from "@/assets/parcel-flyer.webp";
 import imgCard from "@/assets/parcel-card.webp";
-import imgA4 from "@/assets/parcel-a4.png";
+import imgA4 from "@/assets/parcel-a4.webp";
 import imgPack from "@/assets/parcel-docpack.webp";
 const PRESET_IMG: Record<string, string> = { small: imgSmall, medium: imgMedium, large: imgLarge, extra_large: imgXl, document: imgFlyer, card: imgCard, a4: imgA4, document_pack: imgPack };
 export function ParcelEditor({ pieces, onChange }: { pieces:BookingDraft["pieces"]; onChange:(pieces:BookingDraft["pieces"])=>void }) {
