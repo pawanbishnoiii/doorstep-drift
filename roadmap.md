@@ -30,3 +30,11 @@
 - [x] Google address search + reverse lookup fixed; signed-in pincode suggestions use Google, guests use free map.
 - [ ] Load India pincodes — blocked: remix has no data; first user must claim Admin, then Staff console → "Load full India list".
 - [ ] Logos placement, Parcel images, scan sounds, bulk seal/plastic-bag codes, hub bag labels, AI booking summaries, Area/Cluster manager pincode flow — next rounds.
+- [x] Key error ("No suitable key") — stale sessions auto-refresh on load.
+- [x] Main wordmark in header/auth/dashboard; Speed logo in footer; brand icon favicon; help@getxpress.in.
+- [x] Admin Diagnostics page (map display, address lookup, suggestions, pincodes, SMS/payments/SMTP status).
+- [x] Tracking page "Ask about this parcel" AI assistant.
+- [x] Automated role/page-access checks (src/test/role-access.test.tsx).
+- [x] 10 parcel pictures in booking parcel picker + size guide.
+- [ ] SMS (MSG91/Fast2SMS) and Razorpay — blocked: no API keys yet.
+- [ ] Scan sounds, bulk seal/plastic-bag code generator, bag labels, AI booking summaries, Area/Cluster pincode flow — next round.

@@ -57,3 +57,20 @@ async function reverse(lat: number, lng: number): Promise<GeoHit | null> {
 export const googleReverse = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { lat: number; lng: number }) => z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).parse(d))
   .handler(async ({ data }) => reverse(data.lat, data.lng));
+
+type Check = { name: string; ok: boolean; detail: string; ms?: number };
+/** Admin-only live checks of the server-side Maps features (3 small billable calls). */
+export const mapsDiagnostics = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admin only");
+    const checks: Check[] = [];
+    const hasKeys = !!process.env["GOOGLE_MAPS_API_KEY"] && !!process.env["LOVABLE_API_KEY"];
+    checks.push({ name: "Server connection configured", ok: hasKeys, detail: hasKeys ? "Google Maps connection is linked." : "Google Maps connection is not linked — suggestions fall back to OpenStreetMap." });
+    if (!hasKeys) return checks;
+    const run = async (name: string, fn: () => Promise<string>) => { const t = Date.now(); try { checks.push({ name, ok: true, detail: await fn(), ms: Date.now() - t }); } catch (e) { checks.push({ name, ok: false, detail: (e as Error).message, ms: Date.now() - t }); } };
+    await run("Address lookup (pin on map → address)", async () => { const r = await reverse(26.8549, 75.8243); if (!r?.pincode) throw new Error("No pincode returned for a known Jaipur point."); return `${r.label} → ${r.pincode}`; });
+    await run("Place search (typed locality)", async () => { const j = await mapsRequest("places/v1/places:searchText", { body: { textQuery: "Malviya Nagar Jaipur", pageSize: 1, regionCode: "IN" }, fieldMask: "places.formattedAddress" }); const a = j.places?.[0]?.formattedAddress; if (!a) throw new Error("No result."); return a; });
+    await run("Location suggestions (autocomplete)", async () => { const j = await mapsRequest("places/v1/places:autocomplete", { body: { input: "Connaught Pl", includedRegionCodes: ["in"], sessionToken: crypto.randomUUID() }, fieldMask: "suggestions.placePrediction.text.text" }); const n = j.suggestions?.length ?? 0; if (!n) throw new Error("No suggestions."); return `${n} suggestions, e.g. ${j.suggestions[0].placePrediction?.text?.text ?? ""}`; });
+    return checks;
+  });

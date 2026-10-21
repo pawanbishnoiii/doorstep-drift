@@ -9,8 +9,10 @@ import { useProfile } from "@/hooks/use-profile";
 import { ROLE_LABEL, useRoles } from "@/hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
 
+import { navVisible } from "@/lib/access";
+
 type NavItem = { to: string; label: string; icon: typeof Home; staff?: boolean; admin?: boolean; wallet?: boolean; customer?: boolean };
-const NAV: { group: string; items: NavItem[] }[] = [
+export const NAV: { group: string; items: NavItem[] }[] = [
   { group: "My shipping", items: [
     { to: "/users/dashboard", label: "Dashboard", icon: Home, customer: true },
     { to: "/users/addorder", label: "Add order", icon: PackagePlus, customer: true },
@@ -39,6 +41,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/coupons", label: "Offers & coupons", icon: Ticket, admin: true },
     { to: "/pincodes", label: "Pincode master", icon: MapPin, admin: true },
     { to: "/settings", label: "Settings & integrations", icon: Settings, admin: true },
+    { to: "/diagnostics", label: "Diagnostics", icon: Settings, admin: true },
   ] },
 ];
 
@@ -64,7 +67,7 @@ export function AppShell({ children, requirePhone = true, wide = false, skipOnbo
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   };
-  const visible = (i: NavItem) => (!i.customer || !isStaff) && (!i.staff || isStaff) && (!i.admin || isAdmin || (isManager && i.to === "/applications")) && (!i.wallet || (isStaff && !isAdmin));
+  const visible = (i: NavItem) => navVisible(i, roles);
   const phone = data?.profile?.phone ? `+91 ${data.profile.phone}` : "Phone not verified";
   const city = (data?.profile as { city?: string | null } | null | undefined)?.city || "India";
   const home = isStaff ? "/dashboard" : "/users/dashboard";
