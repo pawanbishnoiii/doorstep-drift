@@ -27,7 +27,13 @@ export const requireUser = createMiddleware({ type: "function" }).server(async (
     },
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data.user) throw new Error("Your session expired. Please sign in again.");
-  return next({ context: { supabase, userId: data.user.id, claims: { sub: data.user.id, email: data.user.email } } });
+  // Explicit remote verification; never enter local JWT/JWKS verification.
+  const response = await fetch(`${url}/auth/v1/user`, {
+    headers: { apikey: key, Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok) throw new Error("Your session expired. Please sign in again.");
+  const user = await response.json() as { id?: string; email?: string };
+  if (!user.id) throw new Error("Please sign in again.");
+  return next({ context: { supabase, userId: user.id, claims: { sub: user.id, email: user.email } } });
 });
