@@ -32,6 +32,7 @@ import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/s
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTallyRouteImport } from './routes/_authenticated/tally'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
+import { Route as AuthenticatedTeamPricesRouteImport } from './routes/_authenticated/team-prices'
 import { Route as AuthenticatedVerifyPhoneRouteImport } from './routes/_authenticated/verify-phone'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedLabelsShipmentIdRouteImport } from './routes/_authenticated/labels.$shipmentId'
@@ -159,6 +160,11 @@ const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTeamPricesRoute = AuthenticatedTeamPricesRouteImport.update({
+  id: '/team-prices',
+  path: '/team-prices',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVerifyPhoneRoute =
   AuthenticatedVerifyPhoneRouteImport.update({
     id: '/verify-phone',
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/tally': typeof AuthenticatedTallyRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/team-prices': typeof AuthenticatedTeamPricesRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/tally': typeof AuthenticatedTallyRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/team-prices': typeof AuthenticatedTeamPricesRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
@@ -303,6 +311,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/tally': typeof AuthenticatedTallyRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/team-prices': typeof AuthenticatedTeamPricesRoute
   '/_authenticated/verify-phone': typeof AuthenticatedVerifyPhoneRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/_authenticated/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
@@ -338,6 +347,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tally'
     | '/team'
+    | '/team-prices'
     | '/verify-phone'
     | '/wallet'
     | '/labels/$shipmentId'
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tally'
     | '/team'
+    | '/team-prices'
     | '/verify-phone'
     | '/wallet'
     | '/labels/$shipmentId'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/tally'
     | '/_authenticated/team'
+    | '/_authenticated/team-prices'
     | '/_authenticated/verify-phone'
     | '/_authenticated/wallet'
     | '/_authenticated/labels/$shipmentId'
@@ -590,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTeamRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/team-prices': {
+      id: '/_authenticated/team-prices'
+      path: '/team-prices'
+      fullPath: '/team-prices'
+      preLoaderRoute: typeof AuthenticatedTeamPricesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/verify-phone': {
       id: '/_authenticated/verify-phone'
       path: '/verify-phone'
@@ -673,6 +692,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTallyRoute: typeof AuthenticatedTallyRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedTeamPricesRoute: typeof AuthenticatedTeamPricesRoute
   AuthenticatedVerifyPhoneRoute: typeof AuthenticatedVerifyPhoneRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedLabelsShipmentIdRoute: typeof AuthenticatedLabelsShipmentIdRoute
@@ -700,6 +720,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTallyRoute: AuthenticatedTallyRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedTeamPricesRoute: AuthenticatedTeamPricesRoute,
   AuthenticatedVerifyPhoneRoute: AuthenticatedVerifyPhoneRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedLabelsShipmentIdRoute: AuthenticatedLabelsShipmentIdRoute,
