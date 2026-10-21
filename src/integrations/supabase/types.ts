@@ -109,6 +109,7 @@ export type Database = {
           destination: string
           id: string
           manifest_id: string | null
+          plastic_bag_code: string | null
           seal_no: string | null
           sealed_at: string | null
           status: string
@@ -120,6 +121,7 @@ export type Database = {
           destination: string
           id?: string
           manifest_id?: string | null
+          plastic_bag_code?: string | null
           seal_no?: string | null
           sealed_at?: string | null
           status?: string
@@ -131,6 +133,7 @@ export type Database = {
           destination?: string
           id?: string
           manifest_id?: string | null
+          plastic_bag_code?: string | null
           seal_no?: string | null
           sealed_at?: string | null
           status?: string
@@ -541,13 +544,17 @@ export type Database = {
       point_applications: {
         Row: {
           address: string
+          address_line2: string | null
+          age: number | null
           business_name: string
           business_type: string
           city: string
           created_at: string
           daily_capacity: number | null
+          district: string | null
           email: string
           full_name: string
+          gender: string | null
           id: string
           message: string | null
           phone: string
@@ -557,16 +564,21 @@ export type Database = {
           state: string
           status: string
           user_id: string | null
+          whatsapp: string | null
         }
         Insert: {
           address: string
+          address_line2?: string | null
+          age?: number | null
           business_name: string
           business_type: string
           city: string
           created_at?: string
           daily_capacity?: number | null
+          district?: string | null
           email: string
           full_name: string
+          gender?: string | null
           id?: string
           message?: string | null
           phone: string
@@ -576,16 +588,21 @@ export type Database = {
           state: string
           status?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Update: {
           address?: string
+          address_line2?: string | null
+          age?: number | null
           business_name?: string
           business_type?: string
           city?: string
           created_at?: string
           daily_capacity?: number | null
+          district?: string | null
           email?: string
           full_name?: string
+          gender?: string | null
           id?: string
           message?: string | null
           phone?: string
@@ -595,6 +612,7 @@ export type Database = {
           state?: string
           status?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -647,9 +665,11 @@ export type Database = {
           account_type: string
           avatar_url: string | null
           business_name: string | null
+          city: string | null
           created_at: string
           full_name: string | null
           id: string
+          last_seen_at: string | null
           phone: string | null
           phone_verified: boolean
           updated_at: string
@@ -658,9 +678,11 @@ export type Database = {
           account_type?: string
           avatar_url?: string | null
           business_name?: string | null
+          city?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          last_seen_at?: string | null
           phone?: string | null
           phone_verified?: boolean
           updated_at?: string
@@ -669,9 +691,11 @@ export type Database = {
           account_type?: string
           avatar_url?: string | null
           business_name?: string | null
+          city?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          last_seen_at?: string | null
           phone?: string | null
           phone_verified?: boolean
           updated_at?: string
@@ -1013,6 +1037,36 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          ref: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          ref?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          ref?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1023,6 +1077,18 @@ export type Database = {
         Returns: Json
       }
       admin_exists: { Args: never; Returns: boolean }
+      admin_users: {
+        Args: never
+        Returns: {
+          city: string
+          created_at: string
+          full_name: string
+          last_seen_at: string
+          phone: string
+          roles: string[]
+          user_id: string
+        }[]
+      }
       allocate_pincode: {
         Args: {
           _holder: string
@@ -1080,6 +1146,10 @@ export type Database = {
       }
       import_pincodes: { Args: { _rows: Json }; Returns: number }
       is_staff: { Args: { _u: string }; Returns: boolean }
+      manages_state: {
+        Args: { _state: string; _user: string }
+        Returns: boolean
+      }
       next_awb: { Args: never; Returns: string }
       next_piece_code: { Args: never; Returns: string }
       receive_manifest: { Args: { _manifest_id: string }; Returns: undefined }
@@ -1105,6 +1175,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      touch_last_seen: { Args: never; Returns: undefined }
       track_shipment: { Args: { _tracking: string }; Returns: Json }
       transfer_pincode: {
         Args: { _allocation_id: string; _new_holder: string; _note?: string }
@@ -1113,6 +1184,11 @@ export type Database = {
       update_return_status: {
         Args: { _return_id: string; _status: string }
         Returns: undefined
+      }
+      wallet_balance: { Args: { _user?: string }; Returns: number }
+      wallet_topup: {
+        Args: { _amount: number; _ref?: string }
+        Returns: number
       }
     }
     Enums: {

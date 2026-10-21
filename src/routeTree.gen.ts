@@ -29,9 +29,16 @@ import { Route as AuthenticatedPincodesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedReturnsRouteImport } from './routes/_authenticated/returns'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedTallyRouteImport } from './routes/_authenticated/tally'
+import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedVerifyPhoneRouteImport } from './routes/_authenticated/verify-phone'
+import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedLabelsShipmentIdRouteImport } from './routes/_authenticated/labels.$shipmentId'
 import { Route as AuthenticatedPayShipmentIdRouteImport } from './routes/_authenticated/pay.$shipmentId'
+import { Route as AuthenticatedUsersAddorderRouteImport } from './routes/_authenticated/users.addorder'
+import { Route as AuthenticatedUsersDashboardRouteImport } from './routes/_authenticated/users.dashboard'
+import { Route as AuthenticatedUsersOrdersRouteImport } from './routes/_authenticated/users.orders'
+import { Route as AuthenticatedUsersReturnsRouteImport } from './routes/_authenticated/users.returns'
 import { Route as ApiPublicHealthCheckRouteImport } from './routes/api/public/health-check'
 
 const IndexRoute = IndexRouteImport.update({
@@ -136,12 +143,27 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTallyRoute = AuthenticatedTallyRouteImport.update({
+  id: '/tally',
+  path: '/tally',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVerifyPhoneRoute =
   AuthenticatedVerifyPhoneRouteImport.update({
     id: '/verify-phone',
     path: '/verify-phone',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLabelsShipmentIdRoute =
   AuthenticatedLabelsShipmentIdRouteImport.update({
     id: '/labels/$shipmentId',
@@ -152,6 +174,30 @@ const AuthenticatedPayShipmentIdRoute =
   AuthenticatedPayShipmentIdRouteImport.update({
     id: '/pay/$shipmentId',
     path: '/pay/$shipmentId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedUsersAddorderRoute =
+  AuthenticatedUsersAddorderRouteImport.update({
+    id: '/users/addorder',
+    path: '/users/addorder',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedUsersDashboardRoute =
+  AuthenticatedUsersDashboardRouteImport.update({
+    id: '/users/dashboard',
+    path: '/users/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedUsersOrdersRoute =
+  AuthenticatedUsersOrdersRouteImport.update({
+    id: '/users/orders',
+    path: '/users/orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedUsersReturnsRoute =
+  AuthenticatedUsersReturnsRouteImport.update({
+    id: '/users/returns',
+    path: '/users/returns',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const ApiPublicHealthCheckRoute = ApiPublicHealthCheckRouteImport.update({
@@ -180,9 +226,16 @@ export interface FileRoutesByFullPath {
   '/returns': typeof AuthenticatedReturnsRoute
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/tally': typeof AuthenticatedTallyRoute
+  '/team': typeof AuthenticatedTeamRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/pay/$shipmentId': typeof AuthenticatedPayShipmentIdRoute
+  '/users/addorder': typeof AuthenticatedUsersAddorderRoute
+  '/users/dashboard': typeof AuthenticatedUsersDashboardRoute
+  '/users/orders': typeof AuthenticatedUsersOrdersRoute
+  '/users/returns': typeof AuthenticatedUsersReturnsRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRoutesByTo {
@@ -205,9 +258,16 @@ export interface FileRoutesByTo {
   '/returns': typeof AuthenticatedReturnsRoute
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/tally': typeof AuthenticatedTallyRoute
+  '/team': typeof AuthenticatedTeamRoute
   '/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/pay/$shipmentId': typeof AuthenticatedPayShipmentIdRoute
+  '/users/addorder': typeof AuthenticatedUsersAddorderRoute
+  '/users/dashboard': typeof AuthenticatedUsersDashboardRoute
+  '/users/orders': typeof AuthenticatedUsersOrdersRoute
+  '/users/returns': typeof AuthenticatedUsersReturnsRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRoutesById {
@@ -232,9 +292,16 @@ export interface FileRoutesById {
   '/_authenticated/returns': typeof AuthenticatedReturnsRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/tally': typeof AuthenticatedTallyRoute
+  '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/verify-phone': typeof AuthenticatedVerifyPhoneRoute
+  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/_authenticated/labels/$shipmentId': typeof AuthenticatedLabelsShipmentIdRoute
   '/_authenticated/pay/$shipmentId': typeof AuthenticatedPayShipmentIdRoute
+  '/_authenticated/users/addorder': typeof AuthenticatedUsersAddorderRoute
+  '/_authenticated/users/dashboard': typeof AuthenticatedUsersDashboardRoute
+  '/_authenticated/users/orders': typeof AuthenticatedUsersOrdersRoute
+  '/_authenticated/users/returns': typeof AuthenticatedUsersReturnsRoute
   '/api/public/health-check': typeof ApiPublicHealthCheckRoute
 }
 export interface FileRouteTypes {
@@ -259,9 +326,16 @@ export interface FileRouteTypes {
     | '/returns'
     | '/scan'
     | '/settings'
+    | '/tally'
+    | '/team'
     | '/verify-phone'
+    | '/wallet'
     | '/labels/$shipmentId'
     | '/pay/$shipmentId'
+    | '/users/addorder'
+    | '/users/dashboard'
+    | '/users/orders'
+    | '/users/returns'
     | '/api/public/health-check'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -284,9 +358,16 @@ export interface FileRouteTypes {
     | '/returns'
     | '/scan'
     | '/settings'
+    | '/tally'
+    | '/team'
     | '/verify-phone'
+    | '/wallet'
     | '/labels/$shipmentId'
     | '/pay/$shipmentId'
+    | '/users/addorder'
+    | '/users/dashboard'
+    | '/users/orders'
+    | '/users/returns'
     | '/api/public/health-check'
   id:
     | '__root__'
@@ -310,9 +391,16 @@ export interface FileRouteTypes {
     | '/_authenticated/returns'
     | '/_authenticated/scan'
     | '/_authenticated/settings'
+    | '/_authenticated/tally'
+    | '/_authenticated/team'
     | '/_authenticated/verify-phone'
+    | '/_authenticated/wallet'
     | '/_authenticated/labels/$shipmentId'
     | '/_authenticated/pay/$shipmentId'
+    | '/_authenticated/users/addorder'
+    | '/_authenticated/users/dashboard'
+    | '/_authenticated/users/orders'
+    | '/_authenticated/users/returns'
     | '/api/public/health-check'
   fileRoutesById: FileRoutesById
 }
@@ -469,11 +557,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/tally': {
+      id: '/_authenticated/tally'
+      path: '/tally'
+      fullPath: '/tally'
+      preLoaderRoute: typeof AuthenticatedTallyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/team': {
+      id: '/_authenticated/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AuthenticatedTeamRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/verify-phone': {
       id: '/_authenticated/verify-phone'
       path: '/verify-phone'
       fullPath: '/verify-phone'
       preLoaderRoute: typeof AuthenticatedVerifyPhoneRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/wallet': {
+      id: '/_authenticated/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AuthenticatedWalletRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/labels/$shipmentId': {
@@ -488,6 +597,34 @@ declare module '@tanstack/react-router' {
       path: '/pay/$shipmentId'
       fullPath: '/pay/$shipmentId'
       preLoaderRoute: typeof AuthenticatedPayShipmentIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/users/addorder': {
+      id: '/_authenticated/users/addorder'
+      path: '/users/addorder'
+      fullPath: '/users/addorder'
+      preLoaderRoute: typeof AuthenticatedUsersAddorderRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/users/dashboard': {
+      id: '/_authenticated/users/dashboard'
+      path: '/users/dashboard'
+      fullPath: '/users/dashboard'
+      preLoaderRoute: typeof AuthenticatedUsersDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/users/orders': {
+      id: '/_authenticated/users/orders'
+      path: '/users/orders'
+      fullPath: '/users/orders'
+      preLoaderRoute: typeof AuthenticatedUsersOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/users/returns': {
+      id: '/_authenticated/users/returns'
+      path: '/users/returns'
+      fullPath: '/users/returns'
+      preLoaderRoute: typeof AuthenticatedUsersReturnsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/health-check': {
@@ -514,9 +651,16 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReturnsRoute: typeof AuthenticatedReturnsRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedTallyRoute: typeof AuthenticatedTallyRoute
+  AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedVerifyPhoneRoute: typeof AuthenticatedVerifyPhoneRoute
+  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedLabelsShipmentIdRoute: typeof AuthenticatedLabelsShipmentIdRoute
   AuthenticatedPayShipmentIdRoute: typeof AuthenticatedPayShipmentIdRoute
+  AuthenticatedUsersAddorderRoute: typeof AuthenticatedUsersAddorderRoute
+  AuthenticatedUsersDashboardRoute: typeof AuthenticatedUsersDashboardRoute
+  AuthenticatedUsersOrdersRoute: typeof AuthenticatedUsersOrdersRoute
+  AuthenticatedUsersReturnsRoute: typeof AuthenticatedUsersReturnsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -533,9 +677,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReturnsRoute: AuthenticatedReturnsRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedTallyRoute: AuthenticatedTallyRoute,
+  AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedVerifyPhoneRoute: AuthenticatedVerifyPhoneRoute,
+  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedLabelsShipmentIdRoute: AuthenticatedLabelsShipmentIdRoute,
   AuthenticatedPayShipmentIdRoute: AuthenticatedPayShipmentIdRoute,
+  AuthenticatedUsersAddorderRoute: AuthenticatedUsersAddorderRoute,
+  AuthenticatedUsersDashboardRoute: AuthenticatedUsersDashboardRoute,
+  AuthenticatedUsersOrdersRoute: AuthenticatedUsersOrdersRoute,
+  AuthenticatedUsersReturnsRoute: AuthenticatedUsersReturnsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
