@@ -23,7 +23,8 @@ function Coupons() {
       code: f.code, description: f.description || null, discount_type: f.discount_type, discount_value: Number(f.discount_value),
       max_discount: f.max_discount ? Number(f.max_discount) : null, min_order: Number(f.min_order) || 0,
       max_uses: f.max_uses ? Number(f.max_uses) : null, per_user_limit: Number(f.per_user_limit) || 1,
-      expires_at: f.expires_at ? new Date(f.expires_at).toISOString() : null,
+      // A date-only expiry means "valid through the end of that day" (India time).
+      expires_at: f.expires_at ? new Date(`${f.expires_at}T23:59:59+05:30`).toISOString() : null,
     });
     if (error) toast.error(error.message); else { toast.success("Coupon created"); setF({ ...f, code: "", description: "" }); qc.invalidateQueries({ queryKey: ["coupons"] }); }
   };
