@@ -2,9 +2,10 @@ import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  BarChart3, Bell, ClipboardList, Home, Loader2, LogOut, MapPin, PackagePlus, ScanLine, ShieldCheck, Store, Ticket, UserRound, RotateCcw, Boxes, Coins, Settings, Wallet, Users, ClipboardCheck,
+  BarChart3, Bell, ClipboardList, Home, Loader2, LogOut, MapPin, PackagePlus, ScanLine, Store, Ticket, RotateCcw, Boxes, Coins, Settings, Wallet, Users, ClipboardCheck, Menu, Maximize2, Minimize2,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useProfile } from "@/hooks/use-profile";
 import { ROLE_LABEL, useRoles } from "@/hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +60,10 @@ export function AppShell({ children, requirePhone = true, wide = false, skipOnbo
   useEffect(() => { supabase.rpc("touch_last_seen").then(() => {}); }, []);
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [fs, setFs] = useState(false);
+  useEffect(() => { const h = () => setFs(Boolean(document.fullscreenElement)); document.addEventListener("fullscreenchange", h); return () => document.removeEventListener("fullscreenchange", h); }, []);
+  const toggleFullscreen = () => { if (document.fullscreenElement) void document.exitFullscreen(); else void document.documentElement.requestFullscreen?.().catch(() => {}); };
   if (isLoading) return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   if (requirePhone && !data?.profile?.phone_verified) return <Navigate to="/onboarding" replace />;
   if (requirePhone && !skipOnboarding && !data?.profile?.onboarded_at) return <Navigate to="/onboarding" replace />;
@@ -70,68 +75,64 @@ export function AppShell({ children, requirePhone = true, wide = false, skipOnbo
   const visible = (i: NavItem) => navVisible(i, roles);
   const phone = data?.profile?.phone || "Phone not verified";
   const city = (data?.profile as { city?: string | null } | null | undefined)?.city || "India";
-  const home = isStaff ? "/dashboard" : "/users/dashboard";
-  const name = data?.profile?.full_name || data?.user.email || "";
+  const name = data?.profile?.full_name || "";
+
+  const sidebar = (onNav?: () => void) => (
+    <>
+      <Link to="/" onClick={onNav} className="mx-4 my-4 rounded-xl bg-card px-3 py-2"><BrandMark /></Link>
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
+        {NAV.map((g) => {
+          const items = g.items.filter(visible);
+          if (!items.length) return null;
+          return (
+            <div key={g.group}>
+              <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-widest text-ink-foreground/50">{g.group}</p>
+              {items.map(({ to, label, icon: Icon }) => (
+                <Link key={to + label} to={to} onClick={onNav} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink-foreground/75 transition-colors hover:bg-ink-foreground/10 hover:text-ink-foreground"
+                  activeProps={{ className: "bg-primary !text-primary-foreground" }}>
+                  <Icon className="h-4 w-4" />{label}
+                </Link>
+              ))}
+            </div>
+          );
+        })}
+      </nav>
+      <div className="border-t border-ink-foreground/10 p-4">
+        <p className="truncate text-sm font-bold">{name}</p>
+        <p className="font-mono text-xs text-ink-foreground/80">{phone}</p>
+        <p className="text-xs text-ink-foreground/60">{city} · {primary ? ROLE_LABEL[primary] : "Customer"}</p>
+        <button onClick={signOut} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-ink-foreground/10 py-2 text-sm font-bold"><LogOut className="h-4 w-4" /> Sign out</button>
+      </div>
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-ink text-ink-foreground lg:flex">
-        <Link to="/" className="mx-4 my-4 rounded-xl bg-card px-3 py-2"><BrandMark /></Link>
-        <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
-          {NAV.map((g) => {
-            const items = g.items.filter(visible);
-            if (!items.length) return null;
-            return (
-              <div key={g.group}>
-                <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-widest text-ink-foreground/50">{g.group}</p>
-                {items.map(({ to, label, icon: Icon }) => (
-                  <Link key={to} to={to} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink-foreground/75 transition-colors hover:bg-ink-foreground/10 hover:text-ink-foreground"
-                    activeProps={{ className: "bg-primary !text-primary-foreground" }}>
-                    <Icon className="h-4 w-4" />{label}
-                  </Link>
-                ))}
-              </div>
-            );
-          })}
-        </nav>
-        <div className="border-t border-ink-foreground/10 p-4">
-          <p className="truncate text-sm font-bold">{name}</p>
-          <p className="font-mono text-xs text-ink-foreground/80">{phone}</p>
-          <p className="text-xs text-ink-foreground/60">{city} · {primary ? ROLE_LABEL[primary] : "Customer"}</p>
-          <button onClick={signOut} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-ink-foreground/10 py-2 text-sm font-bold"><LogOut className="h-4 w-4" /> Sign out</button>
-        </div>
-      </aside>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-ink text-ink-foreground lg:flex">{sidebar()}</aside>
 
       <div className="lg:pl-64">
         <header className="sticky top-0 z-30 border-b bg-background/85 px-4 py-3 backdrop-blur-xl lg:px-8">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="lg:hidden"><BrandMark /></Link>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 lg:hidden">
+              <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+                <SheetTrigger asChild><button aria-label="Open menu" className="grid h-10 w-10 place-items-center rounded-xl border bg-card"><Menu className="h-5 w-5" /></button></SheetTrigger>
+                <SheetContent side="left" className="flex w-72 flex-col border-none bg-ink p-0 text-ink-foreground">
+                  <SheetTitle className="sr-only">Menu</SheetTitle>
+                  {sidebar(() => setMenuOpen(false))}
+                </SheetContent>
+              </Sheet>
+              <Link to="/"><BrandMark /></Link>
+            </div>
             <div className="hidden text-sm lg:block"><p className="font-bold">{name} <span className="font-mono font-semibold text-muted-foreground">· {phone}</span></p><p className="text-xs text-muted-foreground">{city} · <Clock /></p></div>
             <div className="flex items-center gap-2">
               <Link to={isStaff ? "/scan" : "/users/dashboard"} className="hidden items-center gap-1.5 rounded-xl border bg-card px-4 py-2 text-sm font-bold sm:flex"><ScanLine className="h-4 w-4" /> Scan</Link>
               <Link to="/users/addorder" className="hidden items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground sm:flex"><PackagePlus className="h-4 w-4" /> Add order</Link>
+              <button onClick={toggleFullscreen} aria-label={fs ? "Exit full screen" : "Full screen"} className="hidden h-10 w-10 place-items-center rounded-xl border bg-card lg:grid">{fs ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}</button>
               <Link to="/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-xl border bg-card"><Bell className="h-4 w-4" /></Link>
-              <button onClick={signOut} aria-label="Sign out" className="grid h-10 w-10 place-items-center rounded-xl border bg-card lg:hidden"><LogOut className="h-4 w-4" /></button>
             </div>
           </div>
         </header>
-        <main className={`mx-auto px-4 pb-28 pt-6 lg:px-8 lg:pb-12 ${wide ? "max-w-7xl" : "max-w-5xl"}`}>{children}</main>
-      </div>
-
-      <div className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] lg:hidden">
-        <div className="mx-auto flex max-w-md items-center justify-around rounded-[24px] border bg-card/90 p-1.5 shadow-soft backdrop-blur-2xl">
-          {([
-            { to: home, icon: Home, label: "Home" },
-            { to: isStaff ? "/orders" : "/users/orders", icon: ClipboardList, label: "Orders" },
-            { to: "/users/addorder", icon: PackagePlus, label: "Ship" },
-            isStaff ? { to: "/scan", icon: ScanLine, label: "Scan" } : { to: "/users/returns", icon: RotateCcw, label: "Returns" },
-            isStaff && !isAdmin ? { to: "/wallet", icon: Wallet, label: "Wallet" } : isAdmin ? { to: "/team", icon: ShieldCheck, label: "Admin" } : { to: "/notifications", icon: UserRound, label: "Me" },
-          ] as const).map(({ to, icon: Icon, label }) => (
-            <Link key={to} to={to} className="flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[10px] font-bold text-muted-foreground" activeProps={{ className: "bg-primary text-primary-foreground" }}>
-              <Icon className="h-5 w-5" />{label}
-            </Link>
-          ))}
-        </div>
+        <main className={`mx-auto px-4 pb-12 pt-6 lg:px-8 ${wide ? "max-w-7xl" : "max-w-5xl"}`}>{children}</main>
       </div>
     </div>
   );
