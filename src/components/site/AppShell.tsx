@@ -2,7 +2,7 @@ import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  BarChart3, Bell, ClipboardList, Home, Loader2, LogOut, MapPin, PackagePlus, ScanLine, Store, Ticket, RotateCcw, Boxes, Coins, Settings, Wallet, Users, ClipboardCheck, Menu, Maximize2, Minimize2,
+  BarChart3, Bell, ClipboardList, Home, Loader2, LogOut, MapPin, PackagePlus, ScanLine, Store, Ticket, RotateCcw, Boxes, Coins, Settings, Wallet, Users, ClipboardCheck, Menu, Maximize2, Minimize2, UserRound,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
