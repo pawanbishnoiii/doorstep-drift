@@ -75,8 +75,7 @@ export function AppShell({ children, requirePhone = true, wide = false, skipOnbo
   const visible = (i: NavItem) => navVisible(i, roles);
   const phone = data?.profile?.phone || "Phone not verified";
   const city = (data?.profile as { city?: string | null } | null | undefined)?.city || "India";
-  const home = isStaff ? "/dashboard" : "/users/dashboard";
-  const name = data?.profile?.full_name || data?.user.email || "";
+  const name = data?.profile?.full_name || "";
 
   const sidebar = (onNav?: () => void) => (
     <>
